@@ -348,6 +348,9 @@
         <h1>Curriculum Network</h1>
         <p>사서교사를 위한 교과 협력 수업 연결망 시각화<br><span style="font-size: 0.8em; color: #888;">(드래그 및 휠로 탐색 가능)</span></p>
     </header>
+    <div
+        style="position: absolute; top: 20px; right: 20px; color: #aaa; font-size: 0.9rem; z-index: 100; font-family: 'Noto Sans KR', sans-serif;">
+        Ⓒ 박보경 2026</div>
     <div class="overlay legend">
         <div class="legend-item">
             <div class="dot" style="background-color: var(--accent-cyan); color: var(--accent-cyan);"></div><span>도서관과
@@ -764,21 +767,27 @@ nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, 
         const database = {};
 
         function parseDatabase() {
-            const lines = rawStandardsText.split('\n');
+            // Trim and split by newline; filter empty lines
+            const lines = rawStandardsText.trim().split('\n');
             const regex = /^\[(.*?)\]\s*(.*)$/;
 
             lines.forEach(line => {
                 line = line.trim();
                 const match = line.match(regex);
                 if (match) {
-                    const code = match[1];
+                    let code = match[1];
                     const desc = match[2];
+
+                    // Normalize code to match TTL format: 9사(일사)01-01 -> 9사_일사_01-01
+                    code = code.replace(/\(/g, '_').replace(/\)/g, '_');
+
                     database[code] = desc;
                 }
             });
         }
 
-        // Will call this after rawStandardsText is filled
+        // Execute immediately to be ready for graph generation
+        parseDatabase();
 
         // 2. Vis.js Setup
         const nodes = new vis.DataSet([]);
@@ -789,10 +798,45 @@ nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, 
             if (addedNodes.has(id)) return;
             let group = 'other';
             let label = id.replace('nc2022:', '');
-            if (label.startsWith('9도정')) group = 'main';
+
+            if (label.startsWith('9도정')) {
+                group = 'main';
+                // Add summary to label (max 15 chars)
+                const desc = database[label];
+                if (desc) {
+                    let summary = desc;
+                    if (summary.length > 15) summary = summary.substring(0, 15) + '...';
+                    label += '\n' + summary;
+                }
+            }
+
             nodes.add({ id: id, label: label, group: group, title: 'Click for details' });
             addedNodes.add(id);
         }
+
+        // Predicate Translation Map
+        const predicateMap = {
+            'integratesWith': '통합',
+            'supports': '지원',
+            'overlapsWith': '공통',
+            'leadsTo': '연계',
+            'methodFor': '방법',
+            'essentialFor': '기초',
+            'connects': '연결',
+            'refines': '심화',
+            'analyzes': '분석',
+            'criticalFocus': '비판',
+            'toolsFor': '도구',
+            'recursiveProcess': '순환',
+            'presents': '발표',
+            'multimodalWith': '복합',
+            'expresses': '표현',
+            'emergingTech': '신기술',
+            'ethicsIn': '윤리',
+            'collaborates': '협력',
+            'citizenship': '시민성',
+            'participates': '참여'
+        };
 
         function parseTTL(data) {
             const lines = data.split('\n');
@@ -803,13 +847,15 @@ nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, 
                 const parts = line.split(/\s+/);
                 if (parts.length < 3) return;
                 const subject = parts[0];
-                const predicate = parts[1];
+                const predicateRaw = parts[1].replace('edu:', '');
+                const predicateLabel = predicateMap[predicateRaw] || predicateRaw; // Use translation
+
                 const objectPart = parts.slice(2).join(' ');
                 const objects = objectPart.split(',').map(s => s.trim());
                 addNode(subject);
                 objects.forEach(object => {
                     addNode(object);
-                    edges.add({ from: subject, to: object, label: predicate.replace('edu:', ''), arrows: 'to', font: { align: 'middle', size: 10, strokeWidth: 0, color: '#aaa' } });
+                    edges.add({ from: subject, to: object, label: predicateLabel, arrows: 'to', font: { align: 'middle', size: 10, strokeWidth: 0, color: '#aaa' } });
                 });
             });
         }
@@ -930,8 +976,8 @@ nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, 
                     addMessage(`'${text}'에 대한 검색 결과가 없어요. 😢`, 'bot');
                 } else {
                     let resultHtml = `총 ${matches.length}건을 찾았어요! 👇<br>`;
-                    // Limit display to 5 to avoid spam
-                    const displayMatches = matches.slice(0, 5);
+                    // Limit display to 20
+                    const displayMatches = matches.slice(0, 20);
 
                     displayMatches.forEach(m => {
                         const nodeId = 'nc2022:' + m.code;
@@ -945,8 +991,8 @@ nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, 
                         </span>`;
                     });
 
-                    if (matches.length > 5) {
-                        resultHtml += `<div style="text-align:center; font-size:0.8rem; margin-top:5px; color:#aaa;">외 ${matches.length - 5}건 더 있음...</div>`;
+                    if (matches.length > 20) {
+                        resultHtml += `<div style="text-align:center; font-size:0.8rem; margin-top:5px; color:#aaa;">외 ${matches.length - 20}건 더 있음...</div>`;
                     }
 
                     addMessage(resultHtml, 'bot');
