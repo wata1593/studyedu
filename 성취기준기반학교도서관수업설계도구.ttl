@@ -1,0 +1,93 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lpg: <http://example.org/lesson-plan-generator/> .
+
+### 1. 온톨로지 스키마 정의 (Schema) ###
+
+# 수업 설계 도구 클래스
+lpg:OnlineLessonTool a owl:Class ;
+    rdfs:label "온라인 수업 설계 도구" ;
+    rdfs:comment "성취기준을 조합하여 프레임워크 2.0 기반 지도안을 생성하는 엔진" .
+
+# 수업 지도안 구성 요소 (프레임워크 2.0)
+lpg:LessonComponent a owl:Class .
+
+lpg:KeyQuestion a rdfs:SubClassOf lpg:LessonComponent ;
+    rdfs:label "핵심 질문/탐구 질문" .
+
+lpg:InquiryActivity a rdfs:SubClassOf lpg:LessonComponent ;
+    rdfs:label "탐구 활동" .
+
+lpg:ActionPlan a rdfs:SubClassOf lpg:LessonComponent ;
+    rdfs:label "실천 및 공유" .
+
+# 속성(Property) 정의
+lpg:combinesWith a owl:ObjectProperty ;
+    rdfs:domain lpg:AchievementStandard ;
+    rdfs:range lpg:AchievementStandard ;
+    rdfs:label "성취기준 조합" ;
+    rdfs:comment "교과 성취기준과 도서관 성취기준을 연계함" .
+
+lpg:generatesContent a owl:ObjectProperty ;
+    rdfs:domain lpg:OnlineLessonTool ;
+    rdfs:range lpg:LessonComponent ;
+    rdfs:label "지도안 내용 생성" .
+
+lpg:alignsWithContext a owl:ObjectProperty ;
+    rdfs:label "삶의 맥락 정렬" .
+
+### 2. 도구의 작동 로직 인스턴스 (예시: 기후위기 프로젝트) ###
+
+# 도구 인스턴스
+lpg:SmartLessonBuilder a lpg:OnlineLessonTool ;
+    lpg:version "2.0" ;
+    lpg:developer "경기도교육청 기반 설계" .
+
+# 성취기준 입력 및 조합 과정
+lpg:Input_Combo_01 a owl:NamedIndividual ;
+    lpg:hasSubjectStandard <http://example.org/std/9과02-05> ; # 과학(생물다양성)
+    lpg:hasLibStandard <http://example.org/std/9도정0303> ;    # 도정(비판적 평가)
+    lpg:combinesWith lpg:DigitalAI_Context ;
+    rdfs:label "과학-도서관 융합 입력값" .
+
+# AI 도구에 의해 생성된 지도안 결과물
+lpg:Output_LessonPlan_01 a lpg:LessonPlan ;
+    lpg:title "기후위기 팩트체크와 생물다양성 보전" ;
+    
+    # [질문] 생성
+    lpg:hasInquiryQuestion [
+        a lpg:KeyQuestion ;
+        lpg:content "기후변화에 관한 정보 홍수 속에서 과학적 사실을 어떻게 선별할 것인가?"
+    ] ;
+    
+    # [탐구] 생성 (사서-교과 협력)
+    lpg:hasInquiryActivity [
+        a lpg:InquiryActivity ;
+        lpg:subjectPart "생물다양성 감소의 과학적 원인 분석" ;
+        lpg:libraryPart "학술 DB 및 뉴스 아카이브를 활용한 정보의 신뢰성 검증(CRAAP)"
+    ] ;
+    
+    # [실천] 생성 (삶의 맥락 연결)
+    lpg:hasActionPlan [
+        a lpg:ActionPlan ;
+        lpg:content "검증된 데이터를 바탕으로 생태 전환 캠페인 웹진 제작" ;
+        lpg:alignsWithContext <http://example.org/context/EcoTransition>
+    ] .
+
+### 3. 제약 조건 및 규칙 (OWL Restrictions) ###
+
+# 모든 수업 지도안은 반드시 하나 이상의 '삶의 맥락'을 포함해야 함
+lpg:LessonPlan rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty lpg:alignsWithContext ;
+    owl:someValuesFrom lpg:ContextOfLife
+] .
+
+# 도정 성취기준은 모든 융합 수업의 '탐구 과정'을 지원하는 필수 요소임
+<http://example.org/std/9도정0201> owl:equivalentClass [
+    a owl:Restriction ;
+    owl:onProperty lpg:generatesContent ;
+    owl:hasValue lpg:InquiryActivity
+] .

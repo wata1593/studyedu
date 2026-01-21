@@ -1,0 +1,74 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2000/01/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix edu2: <http://example.org/framework20/instruction#> .
+
+### 1. 핵심 클래스 정의 (Core Classes)
+
+edu2:LessonPlan a owl:Class ;
+    rdfs:label "깊이 있는 단원 수업 설계안" .
+
+edu2:UnitSession a owl:Class ;
+    rdfs:label "차시별 세부 수업 설계" .
+
+edu2:InquiryQuestion a owl:Class ;
+    rdfs:label "탐구 질문" ;
+    rdfs:comment "호기심을 유발하고 탐구 과정을 견인하는 질문" .
+
+### 2. 단원 설계 요소 (Unit Design - ❶~❿)
+
+edu2:hasBigIdea a owl:DatatypeProperty ;
+    rdfs:domain edu2:LessonPlan ;
+    rdfs:label "❹ 핵심 아이디어" .
+
+edu2:hasContentElement a owl:ObjectProperty ;
+    rdfs:domain edu2:LessonPlan ;
+    rdfs:label "❺ 내용 요소 (지식·이해, 과정·기능, 가치·태도)" .
+
+edu2:hasLifeContext a owl:DatatypeProperty ;
+    rdfs:domain edu2:LessonPlan ;
+    rdfs:label "❼ 삶의 맥락" .
+
+edu2:hasGraspsAssessment a owl:ObjectProperty ;
+    rdfs:domain edu2:LessonPlan ;
+    rdfs:range edu2:GraspsTask ;
+    rdfs:label "❾ 평가 과제 (GRASPS)" .
+
+### 3. 차시 설계 요소 (Session Design - ❶~❿)
+
+edu2:sessionTopic a owl:DatatypeProperty ;
+    rdfs:domain edu2:UnitSession ;
+    rdfs:label "❶ 학습 주제" .
+
+edu2:instructionalIntent a owl:DatatypeProperty ;
+    rdfs:domain edu2:UnitSession ;
+    rdfs:label "❹ 수업 의도" .
+
+edu2:assessmentLinkage a owl:DatatypeProperty ;
+    rdfs:domain edu2:UnitSession ;
+    rdfs:label "❼ 수업-평가 연계 주안점" .
+
+# 수업 단계 (Introduction, Development, Conclusion)
+edu2:Step a owl:Class .
+edu2:Introduction rdfs:subClassOf edu2:Step ; rdfs:label "❽ 도입" .
+edu2:Development rdfs:subClassOf edu2:Step ; rdfs:label "❾ 전개" .
+edu2:Conclusion rdfs:subClassOf edu2:Step ; rdfs:label "❿ 정리" .
+
+### 4. 관계 및 추론 규칙 (Relationships)
+
+# 단원 탐구 질문이 차시로 전이됨
+edu2:appliedInSession a owl:ObjectProperty ;
+    rdfs:domain edu2:InquiryQuestion ;
+    rdfs:range edu2:UnitSession ;
+    rdfs:label "차시 수업 적용 (❺)" .
+
+# 수업 활동의 순환 구조 (Explore-Execute-Reflect)
+edu2:activityCycle a owl:DataProperty ;
+    rdfs:domain edu2:UnitSession ;
+    rdfs:label "❻ 탐구·실행·성찰 수업 활동" .
+
+# 성취기준으로부터의 도출
+edu2:derivedFromStandard a owl:ObjectProperty ;
+    rdfs:domain edu2:UnitSession ;
+    rdfs:range edu2:AchievementStandard .

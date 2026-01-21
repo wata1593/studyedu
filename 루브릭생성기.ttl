@@ -1,0 +1,49 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rubric: <http://example.org/rubric-design#> .
+
+### 1. 수행 준거 핵심 클래스
+rubric:EvaluationCriteria a owl:Class ;
+    rdfs:label "평가 요소 (Criteria)" ;
+    rdfs:comment "성취기준에서 도출한 구체적인 평가 항목" .
+
+rubric:PerformanceLevel a owl:Class ;
+    rdfs:label "수행 수준" ;
+    rdfs:comment "상, 중, 하로 구분되는 학생의 수행 정도" .
+
+### 2. 평가 차원 정의 (2022 개정 교육과정 반영)
+rubric:KnowledgeDimension rdfs:subClassOf rubric:EvaluationCriteria ; rdfs:label "지식·이해 준거" .
+rubric:SkillDimension rdfs:subClassOf rubric:EvaluationCriteria ; rdfs:label "과정·기능 준거" .
+rubric:AttitudeDimension rdfs:subClassOf rubric:EvaluationCriteria ; rdfs:label "가치·태도 준거" .
+
+### 3. 속성 정의
+rubric:assessesStandard a owl:ObjectProperty ;
+    rdfs:domain rubric:EvaluationCriteria ;
+    rdfs:range <http://example.org/collab-lesson#SubjectStandard> ;
+    rdfs:label "평가 대상 성취기준" .
+
+rubric:hasLevelDescription a owl:DatatypeProperty ;
+    rdfs:domain rubric:PerformanceLevel ;
+    rdfs:range xsd:string ;
+    rdfs:label "수준별 특성 진술문" .
+
+### 4. 실제 협력수업 루브릭 인스턴스 예시 (과학 + 도서관)
+# 대상: [9과17-01] 지구온난화 + [9도정0303] 가짜뉴스 판별
+
+rubric:Criteria_Scientific_Literacy a rubric:SkillDimension ;
+    rdfs:label "정보 판별 및 과학적 분석 능력" ;
+    rubric:assessesStandard <http://example.org/collab-lesson#STD_SCI_1701>, <http://example.org/collab-lesson#STD_LIB_0303> .
+
+# 수행 수준 (상)
+rubric:Level_High_SciLib a rubric:PerformanceLevel ;
+    rubric:isLevelOf rubric:Criteria_Scientific_Literacy ;
+    rubric:levelName "상" ;
+    rubric:hasLevelDescription "다양한 정보원(도서관 DB, 논문 등)을 활용하여 지구온난화 관련 가짜뉴스를 과학적 근거에 기반해 완벽히 판별하고, 정보의 공정성을 비판적으로 평가할 수 있음." .
+
+# 수행 수준 (중)
+rubric:Level_Mid_SciLib a rubric:PerformanceLevel ;
+    rubric:isLevelOf rubric:Criteria_Scientific_Literacy ;
+    rubric:levelName "중" ;
+    rubric:hasLevelDescription "제시된 정보 판별 기준에 따라 지구온난화 관련 정보의 신뢰성을 판단할 수 있으며, 일반적인 과학적 사실과 가짜뉴스를 구분할 수 있음." .

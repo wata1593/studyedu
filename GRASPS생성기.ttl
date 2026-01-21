@@ -1,0 +1,98 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2000/01/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix grasps: <http://example.org/edu/grasps#> .
+
+### 1. 클래스 정의 (Classes)
+
+grasps:AssessmentTool a owl:Class ;
+    rdfs:label "평가 도구" ;
+    rdfs:comment "GRASPS 모델을 기반으로 한 수행평가 설계 도구" .
+
+grasps:GRASPSElement a owl:Class ;
+    rdfs:label "GRASPS 구성 요소" .
+
+grasps:AchievementStandard a owl:Class ;
+    rdfs:label "성취기준" ;
+    rdfs:comment "평가 과제 생성의 근거가 되는 교육과정 성취기준 문장" .
+
+grasps:LearningActivityKeyword a owl:Class ;
+    rdfs:label "학습 활동 키워드" ;
+    rdfs:comment "학습자가 수행할 활동의 핵심 개념 및 기능" .
+
+### 2. GRASPS 하위 요소 정의 (Sub-classes)
+
+grasps:Goal a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "목표 (Goal)" ;
+    rdfs:comment "실제 상황에서 맥락에서의 목표, 문제나 도전" .
+
+grasps:Role a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "역할 (Role)" ;
+    rdfs:comment "학습자가 맡게 되는 실제 상황에서의 역할" .
+
+grasps:Audience a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "청중 (Audience)" ;
+    rdfs:comment "결과물을 전달받는 실제 상황의 대상/고객" .
+
+grasps:Situation a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "상황 (Situation)" ;
+    rdfs:comment "실제 상황에서의 맥락 및 도전적 상황" .
+
+grasps:Product a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "수행/산출물 (Product)" ;
+    rdfs:comment "학습자가 만들어낼 결과물과 그 형태" .
+
+grasps:Standards a owl:Class ;
+    rdfs:subClassOf grasps:GRASPSElement ;
+    rdfs:label "기준 (Standards)" ;
+    rdfs:comment "성공적인 수행을 판단하는 기준" .
+
+### 3. 속성 정의 (Properties)
+
+# 입력 관련 속성
+grasps:inputStandard a owl:DatatypeProperty ;
+    rdfs:domain grasps:AssessmentTool ;
+    rdfs:range xsd:string ;
+    rdfs:label "입력 성취기준" .
+
+grasps:inputKeyword a owl:DatatypeProperty ;
+    rdfs:domain grasps:AssessmentTool ;
+    rdfs:range xsd:string ;
+    rdfs:label "입력 키워드" .
+
+# 시나리오 생성 관련 속성
+grasps:hasTemplate a owl:DatatypeProperty ;
+    rdfs:domain grasps:GRASPSElement ;
+    rdfs:range xsd:string ;
+    rdfs:label "문장 완성형 템플릿" .
+
+grasps:definesScenario a owl:ObjectProperty ;
+    rdfs:domain grasps:AssessmentTool ;
+    rdfs:range grasps:GRASPSElement ;
+    rdfs:label "구성 요소 정의" .
+
+### 4. 요소별 템플릿 인스턴스 설정 (Data Instances)
+
+grasps:GoalTemplate a grasps:Goal ;
+    grasps:hasTemplate "당신의 과제는 [키워드]를 해결하는 것이다. 목표는 [성취기준]을 달성하는 것이다." .
+
+grasps:RoleTemplate a grasps:Role ;
+    grasps:hasTemplate "당신은 [역할명]이다. 당신은 [요구사항]을 요청받았다." .
+
+grasps:AudienceTemplate a grasps:Audience ;
+    grasps:hasTemplate "당신의 고객은 [대상]이다. 대상은 [특징]을 가지고 있다." .
+
+grasps:SituationTemplate a grasps:Situation ;
+    grasps:hasTemplate "당신이 직면한 맥락은 [상황]이다. 이 도전은 [문제]를 다루는 것을 포함한다." .
+
+grasps:ProductTemplate a grasps:Product ;
+    grasps:hasTemplate "당신은 [목적]을 위해 [산출물]을 만들 것이다." .
+
+grasps:StandardsTemplate a grasps:Standards ;
+    grasps:hasTemplate "당신의 작품은 [성취기준 준수여부]에 따라 판단될 것이다." .

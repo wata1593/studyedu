@@ -1,0 +1,68 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qf: <http://example.org/framework/question#> .
+
+### 1. 클래스 정의 (Classes)
+
+qf:QuestionType a owl:Class ;
+    rdfs:label "질문 유형" ;
+    rdfs:comment "경기도교육청 프레임워크에 정의된 질문의 9가지 유형" .
+
+qf:AchievementStandard a owl:Class ;
+    rdfs:label "성취기준" ;
+    rdfs:comment "교육과정상의 성취기준 데이터" .
+
+### 2. 하위 질문 유형 정의 (Sub-classes)
+
+qf:CognitiveQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "인지적 질문 (기억 질문)" .
+
+qf:AnalyticalQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "분석적 질문" .
+
+qf:EvaluativeQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "평가적 질문" .
+
+qf:CreativeQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "창의적 질문" .
+
+qf:OpenEndedQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "개방형 질문" .
+
+qf:ClosedEndedQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "폐쇄형 질문" .
+
+qf:ConvergentQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "수렴적 질문 (이해, 절차 질문)" .
+
+qf:ConceptualQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "개념적 질문" .
+
+qf:ControversialQuestion rdfs:subClassOf qf:QuestionType ;
+    rdfs:label "논쟁적 질문" .
+
+### 3. 속성 정의 (Properties)
+
+qf:hasCharacteristic a owl:DatatypeProperty ;
+    rdfs:domain qf:QuestionType ;
+    rdfs:range xsd:string ;
+    rdfs:label "질문 특징" .
+
+qf:hasPromptTemplate a owl:DatatypeProperty ;
+    rdfs:domain qf:QuestionType ;
+    rdfs:range xsd:string ;
+    rdfs:label "질문 생성 템플릿" .
+
+qf:generatedFrom a owl:ObjectProperty ;
+    rdfs:domain qf:QuestionType ;
+    rdfs:range qf:AchievementStandard ;
+    rdfs:label "생성 근거 성취기준" .
+
+### 4. 인스턴스 예시 (Data Instance - Conceptual Question)
+
+qf:ConceptualQuestion_Example a qf:ConceptualQuestion ;
+    qf:hasCharacteristic "개념과 개념 간의 연관성, 본질 파악" ;
+    qf:hasPromptTemplate "{개념A}와 {개념B}는 어떤 관계가 있는가?" ;
+    rdfs:comment "개념적 질문의 구조적 예시" .

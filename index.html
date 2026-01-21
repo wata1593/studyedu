@@ -4,1015 +4,1812 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사서교사 교과 협력 수업 연구소 - 지식 그래프</title>
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap"
+    <title>사서교사-교과교사 협력수업 설계도구(중학교)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
         rel="stylesheet">
+
+    <!-- Data Source -->
+    <script src="./data/standards_data.js"></script>
+
     <style>
         :root {
-            --bg-color: #050608;
-            --text-color: #e0e6ed;
-            --accent-cyan: #00f3ff;
-            --accent-magenta: #bc13fe;
-            --accent-yellow: #f9d71c;
-            --panel-bg: rgba(20, 25, 40, 0.85);
+            --primary-color: #6366f1;
+            /* Indigo 500 */
+            --primary-hover: #4f46e5;
+            /* Indigo 600 */
+            --secondary-color: #10b981;
+            /* Emerald 500 */
+            --accent-color: #f59e0b;
+            /* Amber 500 */
+            --bg-color: #f8fafc;
+            /* Slate 50 */
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            /* Slate 800 */
+            --text-sub: #64748b;
+            /* Slate 500 */
+            --border-color: #e2e8f0;
+            /* Slate 200 */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Noto Sans KR', sans-serif;
-            overflow: hidden;
-        }
-
-        #network {
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at center, #1a1f35 0%, #050608 100%);
-        }
-
-        .overlay {
-            position: absolute;
-            z-index: 10;
+        .copyright {
+            position: fixed;
+            top: 15px;
+            right: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             pointer-events: none;
         }
 
-        header {
-            top: 20px;
-            left: 20px;
-            background: var(--panel-bg);
-            padding: 20px;
-            border-left: 4px solid var(--accent-cyan);
-            border-radius: 0 10px 10px 0;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
-            pointer-events: auto;
-            max-width: 400px;
+        @media print {
+            .copyright {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
         }
 
-        h1 {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            color: var(--accent-cyan);
-            text-shadow: 0 0 5px var(--accent-cyan);
-        }
-
-        p {
-            margin: 10px 0 0 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #ccc;
-        }
-
-        .legend {
-            bottom: 20px;
-            right: 20px;
-            background: var(--panel-bg);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            box-shadow: 0 0 5px currentColor;
-        }
-
-        /* Chatbot Container - Bottom Left */
-        #chatbot-container {
-            position: absolute;
-            bottom: 20px;
-            /* Moved to bottom */
-            left: 20px;
-            pointer-events: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Center align for label */
-            z-index: 20;
-        }
-
-        .chat-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #00f3ff, #bc13fe);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .chat-icon:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(188, 19, 254, 0.8);
-        }
-
-        .chat-label {
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: var(--accent-cyan);
-            background: rgba(0, 0, 0, 0.6);
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-weight: bold;
-            text-shadow: 0 0 2px var(--accent-cyan);
-        }
-
-        .chat-window {
-            position: absolute;
-            bottom: 90px;
-            /* Opens upward */
-            left: 0;
-            width: 320px;
-            height: 400px;
-            background: rgba(20, 25, 40, 0.95);
-            border: 2px solid var(--accent-magenta);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            transform-origin: bottom left;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            transform: scale(0);
-            opacity: 0;
-        }
-
-        .chat-window.open {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .chat-header {
-            background: linear-gradient(90deg, var(--accent-magenta), #8000ff);
-            padding: 15px;
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chat-body {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .chat-body::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .chat-body::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 2px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 10px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .msg-bot {
-            align-self: flex-start;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px 12px 12px 0;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            color: #e0e6ed;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: var(--accent-magenta);
-            color: #fff;
-            border-radius: 12px 12px 0 12px;
-        }
-
-        .chat-footer {
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.3);
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 8px 15px;
-            color: #fff;
-            outline: none;
+        body {
             font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
         }
 
-        .chat-send {
-            background: transparent;
-            border: none;
-            color: var(--accent-cyan);
-            cursor: pointer;
-            font-size: 1.2rem;
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
         }
 
-        .search-result {
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+
+        /* Layout Wrapper */
+        .main-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            max-width: 1300px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            padding: 2rem 0;
+        }
+
+        .sidebar-card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
             display: block;
-            background: rgba(0, 243, 255, 0.1);
-            margin-top: 5px;
-            padding: 5px 8px;
-            border-radius: 6px;
-            cursor: pointer;
+            text-align: center;
+        }
+
+        .ref-link {
+            display: block;
+            padding: 0.8rem;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
             border: 1px solid transparent;
+        }
+
+        .ref-link:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .ref-link span {
+            display: block;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            padding: 2rem 0;
+            max-width: 1000px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .sidebar {
+                padding-bottom: 0;
+            }
+
+            .sidebar-card {
+                position: static;
+            }
+        }
+
+        .sidebar-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .btn-admin {
+            background-color: #f1f5f9;
+            color: var(--text-sub);
+            border: 1px dashed var(--border-color);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            width: 100%;
             transition: all 0.2s;
         }
 
-        .search-result:hover {
-            background: rgba(0, 243, 255, 0.2);
-            border-color: var(--accent-cyan);
-            color: #fff;
+        .btn-admin:hover {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            border-color: var(--text-sub);
         }
 
-        .search-result.no-link {
-            cursor: default;
-            border-color: rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .search-result.no-link:hover {
-            border-color: rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            color: #ddd;
-        }
-
-        /* Popup Card */
-        .popup-card {
-            position: absolute;
-            top: 50%;
-            right: 50px;
-            transform: translateY(-50%);
-            width: 400px;
-            background: rgba(10, 15, 30, 0.95);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
-            backdrop-filter: blur(10px);
-            color: #fff;
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             display: none;
-            pointer-events: auto;
-            transition: opacity 0.3s ease;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(2px);
         }
 
-        .popup-header {
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 10px;
-            flex-shrink: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.8rem;
         }
 
-        .popup-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: var(--accent-yellow);
-            margin: 0;
+        .link-item-edit {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
         }
 
-        .popup-close {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #aaa;
-            line-height: 1;
-        }
-
-        .popup-close:hover {
-            color: #fff;
-        }
-
-        .popup-body {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #ddd;
+        .manage-list {
+            max-height: 300px;
             overflow-y: auto;
-            padding-right: 5px;
+            margin-bottom: 1.5rem;
         }
 
-        .popup-body::-webkit-scrollbar {
-            width: 6px;
+        .btn-danger {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            cursor: pointer;
         }
 
-        .popup-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
+        .btn-danger:hover {
+            background-color: #fecaca;
+        }
+
+        /* Wizard Progress */
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .wizard-progress::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            background-color: var(--border-color);
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        .step-indicator {
+            position: relative;
+            z-index: 1;
+            background-color: var(--bg-color);
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            color: var(--text-sub);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid var(--bg-color);
+        }
+
+        .step-indicator.active .step-circle {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-indicator.completed .step-circle {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-sub);
+        }
+
+        .step-indicator.active .step-label {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Step Content */
+        .step-content {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        select,
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+            /* Fix padding issue */
+        }
+
+        select:focus,
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Standard Cards */
+        .standard-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            /* Slate 50 */
+        }
+
+        .standard-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .standard-item:last-child {
+            border-bottom: none;
+        }
+
+        .standard-item:hover {
+            background-color: #e0e7ff;
+            /* Indigo 100 */
+        }
+
+        .standard-item.selected {
+            background-color: #c7d2fe;
+            /* Indigo 200 */
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .code-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Chips for Context */
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chip {
+            padding: 0.5rem 1rem;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background-color: #cbd5e1;
+        }
+
+        .chip.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Navigation Buttons */
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-prev {
+            background-color: #cbd5e1;
+            /* Slate 300 */
+            color: var(--text-main);
+        }
+
+        .btn-prev:hover {
+            background-color: #94a3b8;
+            /* Slate 400 */
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-print {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: #059669;
+        }
+
+        /* Summary Box in Step 4 */
+        .summary-box {
+            background-color: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .summary-item {
+            margin-bottom: 1rem;
+        }
+
+        .summary-label {
+            font-weight: bold;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .summary-content {
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        /* Design Grid in Step 4 */
+        .design-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .design-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .full-width {
+                grid-column: span 2;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: white;
+            }
+
+            header,
+            .wizard-progress,
+            .btn-container,
+            .sidebar {
+                display: none !important;
+            }
+
+            .main-wrapper {
+                display: block;
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+
+            .step-content {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                display: none !important;
+                /* Hide unnecessary steps by default */
+                margin-bottom: 2rem;
+            }
+
+            /* Conditional visibility based on print mode */
+            body.print-step-4 #step4,
+            body.print-step-5 #step5,
+            body.print-step-6 #step6,
+            body.print-all #step4,
+            body.print-all #step5,
+            body.print-all #step6 {
+                display: block !important;
+            }
+
+            body.print-all .step-content {
+                page-break-before: always;
+            }
+
+            body.print-all #step4 {
+                page-break-before: avoid;
+            }
+
+            textarea,
+            input[type="text"] {
+                border: 1px solid #eee !important;
+                resize: none;
+                font-family: inherit;
+                background: transparent !important;
+                color: black !important;
+                height: auto !important;
+                /* Allow height to be driven by JS or content */
+            }
+
+            .summary-box {
+                border: 1px solid #818cf8;
+                background-color: #f8fafc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            table {
+                page-break-inside: auto;
+                /* Allow table to split across pages */
+                border-collapse: collapse !important;
+                table-layout: fixed;
+                /* Keep column widths stable */
+            }
+
+            tr {
+                page-break-inside: avoid;
+                /* Avoid breaking in middle of a row */
+            }
+
+            th,
+            td {
+                border: 1px solid #bfdbfe !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                word-break: break-all;
+            }
+        }
+
+        /* Export Only Styles */
+        .export-only {
+            display: none;
+        }
+
+        .no-export {
+            display: inline-block;
+        }
+
+        /* When exporting, we will swap these */
+        .exporting .no-export {
+            display: none !important;
+        }
+
+        .exporting .export-only {
+            display: block !important;
         }
     </style>
 </head>
 
 <body>
-    <div id="network"></div>
-    <header class="overlay">
-        <h1>Curriculum Network</h1>
-        <p>사서교사를 위한 교과 협력 수업 연결망 시각화<br><span style="font-size: 0.8em; color: #888;">(드래그 및 휠로 탐색 가능)</span></p>
+    <div class="copyright">Ⓒ 박보경 2026</div>
+    <header>
+        <h1>사서교사-교과교사 협력수업 설계도구(중학교)</h1>
+        <p>성취기준 기반 학교도서관-교과 융합 수업 디자인</p>
+        <p style="font-size: 0.9rem; margin-top: 0.3rem; opacity: 0.8;">(대상과목 : 국어, 영어, 일반사회, 지리, 과학, 도덕, 미술, 진로)</p>
     </header>
-    <div
-        style="position: absolute; top: 20px; right: 20px; color: #aaa; font-size: 0.9rem; z-index: 100; font-family: 'Noto Sans KR', sans-serif;">
-        Ⓒ 박보경 2026</div>
-    <div class="overlay legend">
-        <div class="legend-item">
-            <div class="dot" style="background-color: var(--accent-cyan); color: var(--accent-cyan);"></div><span>도서관과
-                정보생활 (9도정)</span>
-        </div>
-        <div class="legend-item">
-            <div class="dot" style="background-color: var(--accent-magenta); color: var(--accent-magenta);"></div>
-            <span>연계 교과 (국어, 사회 등)</span>
-        </div>
-    </div>
 
-    <div id="chatbot-container">
-        <div class="chat-icon" onclick="toggleChat()">🤖</div>
-        <div class="chat-label">성취기준 검색</div> <!-- Label added -->
-        <div class="chat-window" id="chatWindow">
-            <div class="chat-header"><span style="font-size: 1.2rem;">🤖</span> Curri-Bot</div>
-            <div class="chat-body" id="chatBody">
-                <div class="message msg-bot">모든 과목의 성취기준을 검색할 수 있어요!<br>키워드를 입력해주세요. (예: 인권, 에너지)</div>
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <span class="sidebar-title">참고링크</span>
+
+                <div id="dynamicLinks">
+                    <!-- Links will be rendered here -->
+                </div>
+
+                <div class="sidebar-footer">
+                    <button class="btn-admin" onclick="openAdminModal()">⚙️ 링크 관리</button>
+                </div>
             </div>
-            <div class="chat-footer">
-                <input type="text" id="chatInput" class="chat-input" placeholder="키워드 검색..."
-                    onkeypress="handleKeyPress(event)">
-                <button class="chat-send" onclick="sendMessage()">➤</button>
+        </aside>
+
+        <div class="container">
+            <!-- Wizard Progress -->
+            <div class="wizard-progress">
+                <div class="step-indicator active" id="ind-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">교과 선택</div>
+                </div>
+                <div class="step-indicator" id="ind-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">도서관 선택</div>
+                </div>
+                <div class="step-indicator" id="ind-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">맥락 설정</div>
+                </div>
+                <div class="step-indicator" id="ind-4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">수업 설계</div>
+                </div>
+                <div class="step-indicator" id="ind-5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">과제 설계</div>
+                </div>
+                <div class="step-indicator" id="ind-6">
+                    <div class="step-circle">6</div>
+                    <div class="step-label">평가 루브릭</div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div id="infoPopup" class="popup-card" style="display:none;">
-        <div class="popup-header">
-            <h3 class="popup-title" id="popupTitle">성취기준 정보</h3><span class="popup-close"
-                onclick="closePopup()">&times;</span>
-        </div>
-        <div class="popup-body" id="popupContent"></div>
-    </div>
+            <!-- Step 1: Subject Selection -->
+            <div class="step-content active" id="step1">
+                <h2>1. 교과 성취기준 선택</h2>
+                <div class="form-group">
+                    <label for="subjectSelect">교과목 선택</label>
+                    <select id="subjectSelect" onchange="renderSubjectStandards()">
+                        <option value="">교과를 선택하세요</option>
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
 
-    <script>
-        // Placeholder for the massive text data
-        let rawStandardsText = `
-성취기준(도정)_중학교
-
-[9도정0101] 정보와 매체의 개념과 특징을 이해하고, 정보와 매체의 가치를 인식한다.
-[9도정0102] 디지털 기술의 발전이 정치·경제·사회·문화 측면에서 정보생활에 미치는 영향력을 탐구한다.
-[9도정0103] 시대 변화에 따른 도서관의 역할과 우리 도서관이 제공하는 서비스의 범위를 이해하여 능동적으로 활용하는 태도를 기른다.
-[9도정0104] 정보와 매체 활용에 있어 윤리적으로 고려해야 하는 사항을 이해하고 다양한 정보와 매체를 책임감 있게 활용하는 태도를 기른다.
-[9도정0105] 매체 기술 발전에 따라 등장한 멀티 리터러시의 필요성을 인식하고 미래 리터러시의 발전 방향을 예측한다.
-[9도정0201] 정보탐색과정의 단계를 이해하고 문제해결과정에 적용한다.
-[9도정0202] 정보를 활용하여 해결할 수 있는 과제를 분석하여 정보 탐색 전략을 세우고 정보 탐색을 실행한다.
-[9도정0203] 정보원의 개념과 정보원의 유형, 유형별 특징을 이해하고 선택하여 정보를 탐색하는 데 활용한다.
-[9도정0204] 진로·동아리 교육과정과 관련된 문제를 도서관의 다양한 정보매체를 활용하여 탐구한다.
-[9도정0205] 정보 판별 기준을 이해하고 탐색한 정보 중에서 적합하고 관련 있는 정보를 판별하며 재탐색을 실행한다.
-[9도정0301] 객관적 정보, 주장하는 정보, 감상과 소통의 정보가 의미하는 정보의 내용적 성격에 따른 유형을 이해한다. 
-[9도정0302] 정보의 내용적 성격에 따른 유형별로 알맞은 정보 분석 전략을 세워 정보의 내용을 분석하고 감상할 수 있다.  
-[9도정0303] 비판적 정보 평가의 중요성을 인식하고, 가짜뉴스를 판별할 수 있다.
-[9도정0304] 디지털 도구를 활용하여 데이터를 분석하고 효과적인 의사소통에 활용한다. 
-[9도정0305] 분석한 정보를 정보 판별 기준에 의거하여 지속적으로 판별하며 정보탐색과정을 순차적이로 진행할지, 재탐색 및 분석을 수행할지 판단한다
-[9도정0401] 디지털 미디어 정보 환경을 이해하고 다양한 매체에 따라 특징과 정보를 종합하여 표현할 수 있다.
-[9도정0402] 멀티 모달(말, 글, 시각적, 제스춰)에 의한 정보표현의 유형과 기술을 습득하여 정보를 생산하여 공유한다.
-[9도정0403] 의사소통의 유형을 이해하고 목적에 맞는 다양한 형태로 정보를 가공하고 표현할 수 있다.
-[9도정0404] 생성형 AI에 대해 이해하고 이를 활용한 정보표현 사례를 조사하고 설명할 수 있다
-[9도정0501] 정보윤리의 중요성을 이해하고 정보를 활용하는 과정에서 개인의 책임을 다할 수 있다. 
-[9도정0502] 인공지능 시대에 요구되는 정보윤리의 새로운 쟁점을 파악할 수 있다.
-[9도정0503] 디지털 도구를 활용하여 협력적 정보문제해결 과정에 참여할 수 있다.
-[9도정0504] 디지털 시민성의 개념을 이해하고 책임감 있는 정보 행동을 실천할 수 있다. 
-[9도정0505] 도서관이 제공하는 정보공유 서비스를 이용하여 협력적 활동에 참여할 수 있다.
-
-
-성취기준(도덕)_중학교
-
-[9도01-01] 자신의 삶과 가치관에 대한 성찰을 통해 자아를 올바로 이해하고, 삶에서 도덕이 필요한 이유에 근거하여 도덕적인 삶에 대한 의지를 기른다.
-[9도01-02] 일상에서 발생하는 부도덕한 행동의 여러 원인을 분석하고, 도덕적 인격이 갖추어야 할 특성들을 파악하여 이를 내면화하는 의지를 기른다.
-[9도01-03] 행복에 관한 심리적, 사회적, 윤리적 접근 등을 통해 행복의 의미를 종합적으로 파악하고, 삶의 목적과 행복의 관계를 정립할 수 있다.
-[9도01-04] 옳고 그름을 분별할 수 있는 도덕적 기준을 탐구하고, 도덕적 상상력을 바탕으로 일상의 도덕 문제들에 도덕적 추론을 적용할 수 있다.
-[9도01-05] 삶의 유한함에 관한 성찰을 통해 생명의 소중함과 의미 있는 삶의 중요성을 인식하고, 자신의 미래 모습을 상상하며 삶을 계획하고 이를 실천하는 의지를 기른다.
-[9도01-06] 내면에 대한 성찰을 통해 심리적 고통과 불안, 우울감 등의 원인을 찾고, 마음의 평온을 얻을 수 있는 방안들을 다각적으로 모색하여 실천할 수 있다.
-[9도01-07] 삶에서 직업이 갖는 의미와 가치를 파악하며, 사례 탐구를 통해 직업적 양심과 직업윤리의 필요성을 정당화할 수 있다.
-[9도02-01] 정서적, 배려적 공동체로서 가정의 특성과 도덕적 기능을 파악하고, 가정에서 발생하는 갈등을 공감적인 소통과 민주적인 과정을 통해 해소하는 의지를 기른다.
-[9도02-02] 친구의 의미와 가치를 삶의 맥락 속에서 탐구하고, 서로를 인격적으로 존중하는 친구 관계를 상상하며 이를 실현하는 의지를 기른다.
-[9도02-03] 가상공간과 현실 세계에 대한 비교⋅분석을 바탕으로 가상공간에서 발생하는 도덕 문제들의 원인과 해결 방안을 제안하고, 타인을 존중하며 가상공간을 활용하는 태도를 함양한다.
-[9도02-04] 인간을 관계적 존재로 해석할 수 있는 이유에 근거하여 타인과의 관계에서 필요한 가치⋅덕목을 탐구하고, 타인의 생각과 감정에 공감하는 태도를 기른다.
-[9도02-05] 다양한 갈등 상황을 평화적으로 해결할 수 있는 방안을 모색하고, 폭력의 유형과 원인, 결과에 대한 분석을 바탕으로 일상의 폭력 상황에 대한 대처 능력을 기른다.
-[9도02-06] 청소년기의 바람직한 성윤리를 탐구하여 내면화하고, 사회⋅문화적 차원에서 성의 의미를 파악하여 성에 대한 편견의 문제점을 분석하고 이를 바로잡는 의지를 기른다.
-[9도03-01] 인권을 존중해야 하는 도덕적 이유를 정당화하고, 인권 침해 사례에 대한 탐구를 통해 그 원인과 해결 방안을 도출함으로써 인권 감수성을 기른다.
-[9도03-02] 외집단에 대한 편견을 비판적으로 분석하고, 타문화⋅타종교⋅타인종을 존중해야 하는 이유에 근거하여 차이와 다양성에 대한 열린 마음을 기른다.
-[9도03-03] 북한에 대한 이해를 바탕으로 분단의 문제점을 분석하고, 도덕적 가치에 기초하여 통일의 의미를 재구성함으로써 바람직한 남북관계 및 통일의 방향을 제안할 수 있다.
-[9도03-04] 정의로운 사회를 상상해보고, 이를 실현할 수 있는 정의의 원칙과 제도에 대한 다양한 의견들을 민주적인 방식으로 종합할 수 있다.
-[9도03-05] 국가와 시민 사이에서 발생하는 윤리적 쟁점들을 탐구하고, 국가와 시민 사이의 바람직한 관계에 기초하여 국가와 시민의 역할을 재구성할 수 있다.
-[9도03-06] 인류의 고통에 공감하며 지구적 차원의 다양한 도덕 문제들을 탐구하고, 해결 방안을 모색하여 실천하는 자세를 갖는다.
-[9도03-07] 현대 과학기술과 관련된 윤리적 쟁점의 분석을 통해 과학기술의 유용성과 한계를 인식하고, 과학기술의 바람직한 활용에 관한 관심과 책임 의식을 기른다.
-[9도04-01] 인간 이외의 생명체를 도덕적으로 고려해야 하는 이유를 정당화하고, 생명을 가진 존재들이 겪는 고통에 공감하며 생명을 소중히 여기는 태도를 기른다.
-[9도04-02] 자연에 대한 동양과 서양의 주요 입장들을 토대로 인간과 자연의 바람직한 관계를 도출하고, 환경 위기에 대한 윤리적 책임을 구체화하여 실천할 수 있다.
-
-
-성취기준(일반사회)_중학교
-
-[9사(일사)01-01] 사회화의 의미를 일상생활의 사례를 들어 설명하고, 사회화 과정에서 형성되는 자아 정체성에 대해 성찰한다.
-[9사(일사)01-02] 사회적 지위와 역할의 의미를 설명하고, 일상생활에서 나타나는 역할 갈등 사례와 대응 방안을 탐색한다.
-[9사(일사)01-03] 우리 사회에 나타나는 다양한 갈등과 차별의 사례를 조사하고, 이에 대처하는 시민의 자질에 대해 토의한다.
-[9사(일사)02-01] 일상생활에서 접하는 문화의 사례를 탐색하고, 이를 바탕으로 문화의 의미와 특징을 도출한다.
-[9사(일사)02-02] 우리 주변에서 활용되는 미디어들을 탐색하고, 미디어를 통해 경험하는 다양한 문화와 정보들을 비판적으로 검토한다.
-[9사(일사)02-03] 여러 집단에서 나타나는 다양한 문화 사례들을 조사하고, 문화를 이해하는 바람직한 태도에 대하여 토의한다.
-[9사(일사)03-01] 공동체 생활에 필요한 정치의 역할을 탐색하고, 다양한 정치 사례를 통해 민주주의의 의미와 필요성을 도출한다.
-[9사(일사)03-02] 민주주의의 발전 과정을 검토하고, 이를 토대로 민주주의의 이념과 기본 원리를 도출한다.
-[9사(일사)03-03] 현대 민주주의의 특징과 과제를 검토하고, 우리나라 민주주의의 발전을 위한 제도적 방안과 시민의 역할에 대해 토의한다.
-[9사(일사)04-01] 선거의 기능과 기본 원칙을 검토하고, 선거 과정에서 유권자와 정당이 수행하는 활동을 조사한다.
-[9사(일사)04-02] 정치활동에 참여하는 다양한 정치 주체의 역할을 탐색하고, 정치과정의 의미를 설명한다.
-[9사(일사)04-03] 민주주의의 발전을 위한 지방 자치의 중요성을 설명하고, 지역사회의 문제를 해결하기 위한 시민 참여 활동을 계획한다.
-[9사(일사)05-01] 법의 의미와 특징을 설명하고, 일상생활에서 접하는 법의 사례를 통해 법의 목적을 도출한다.
-[9사(일사)05-02] 우리의 일상을 규율하는 다양한 법을 탐색하고, 국내외 사례를 통해 사회법이 필요한 이유에 대해 토의한다.
-[9사(일사)05-03] 재판의 의미와 종류를 설명하고, 공정한 재판의 중요성에 대해 토의한다.
-[9사(일사)06-01] 일상생활에서 인권이 침해되는 사례를 조사하고, 우리 헌법에 보장된 기본권의 종류를 탐색한다.
-[9사(일사)06-02] 기본권 제한의 요건과 한계가 헌법에 명시된 이유를 토의하고, 기본권 침해 시 구제 방법을 조사한다.
-[9사(일사)06-03] 근로자에게 보장되는 권리를 조사하고, 이러한 권리의 침해에 대처하는 국가와 시민의 노력에 대해 토의한다.
-[9사(일사)07-01] 우리나라의 정부 형태를 설명하고, 대통령과 행정부의 역할을 탐색한다.
-[9사(일사)07-02] 국회에서 법률이 만들어지는 사례를 탐색하고, 입법기관으로서 국회의 역할을 조사한다.
-[9사(일사)07-03] 사법기관으로서 법원의 역할을 검토하고, 헌법재판소의 성격에 대해 토의한다.
-[9사(일사)08-01] 경제생활에서 합리적 선택의 필요성에 대해 검토하고, 비용과 편익을 고려한 합리적 선택 방안을 탐색한다.
-[9사(일사)08-02] 일생 동안 이루어지는 경제생활을 분석하고, 안정적인 금융 생활을 위한 자산 및 신용 관리 방안을 계획한다.
-[9사(일사)08-03] 시장경제에서 기업의 역할과 사회적 책임을 설명하고, 우리 사회에 필요한 기업가 정신에 대해 토의한다.
-[9사(일사)09-01] 일상생활에서 접하는 다양한 시장의 사례를 조사하고, 이를 토대로 시장의 의미와 필요성을 설명한다.
-[9사(일사)09-02] 수요 법칙과 공급 법칙을 사례를 통해 도출하고, 이를 토대로 시장 가격이 결정되는 원리를 설명한다.
-[9사(일사)09-03] 시장경제에서 수요와 공급을 변화시키는 요인을 조사하고, 시장 가격의 변동에 대응하는 방안을 계획한다.
-[9사(일사)10-01] 우리나라의 경제 성장 전후 모습을 검토하고, 국내 총생산의 증가가 우리 생활에 미치는 영향에 대해 토의한다.
-[9사(일사)10-02] 물가 변동과 실업의 사례를 탐색하고 물가 변동과 실업이 우리 생활에 미치는 영향을 제시한다.
-[9사(일사)10-03] 세계화 시대에 국제 거래가 이루어지는 사례를 탐색하고, 환율 변동이 우리 생활에 미치는 영향을 조사한다.
-[9사(일사)11-01] 국제 사회를 구성하는 여러 행위 주체의 활동을 조사하고, 이를 토대로 국제 사회의 특징을 도출한다.
-[9사(일사)11-02] 국제 사회의 다양한 분쟁에 대해 조사하고, 지역, 국가, 세계의 시민으로서 우리의 역할에 대해 토의한다.
-[9사(일사)11-03] 우리나라가 직면하고 있는 국제 문제에 대해 조사하고, 이러한 문제에 대응하기 위한 방안에 대해 토론한다.
-[9사(일사)12-01] 오늘날 우리 사회가 겪는 사회 변동에 대해 조사하고, 이러한 사회 변동이 우리 생활에 미치는 영향을 분석한다.
-[9사(일사)12-02] 오늘날의 주요한 사회문제를 조사하고, 이러한 사회문제가 우리 생활에 미치는 영향에 대해 토의한다.
-[9사(일사)12-03] 사회 변동과 사회문제에 대응하는 국내외의 사례들을 검토하고, 시민으로서 지녀야 할 태도와 실천 방안에 대해 토의한다.
-
-
-성취기준(영어)_중학교
-
-[9영01-01] 단어, 어구, 문장을 듣고 연음이나 축약된 소리를 식별한다.
-[9영01-02] 친숙한 주제에 관한 담화나 글에서 세부 정보를 파악한다.
-[9영01-03] 친숙한 주제에 관한 담화나 글의 중심 내용을 파악한다.
-[9영01-04] 친숙한 주제에 관한 담화나 글에서 일이나 사건의 논리적 관계를 파악한다.
-[9영01-05] 친숙한 주제에 관한 담화나 글에서 인물의 기분이나 감정을 추론한다.
-[9영01-06] 친숙한 주제에 관한 담화나 글에서 화자나 필자의 의도나 목적을 추론한다.
-[9영01-07] 단어, 어구, 문장의 함축적 의미를 추론한다.
-[9영01-08] 적절한 전략을 활용하여 다양한 매체로 표현된 담화나 글을 듣거나 읽는다.
-[9영01-09] 다양한 관점을 존중하는 태도로 듣거나 읽는다.
-[9영01-10] 자신의 관심사에 관한 다양한 담화나 글을 선택하여 적극적으로 듣거나 읽는다.
-[9영02-01] 연음이나 축약된 소리를 활용하여 단어, 어구, 문장을 말한다.
-[9영02-02] 대상이나 인물의 감정을 묘사한다.
-[9영02-03] 친숙한 주제에 관해 사실적 정보를 설명한다.
-[9영02-04] 친숙한 주제에 관해 경험이나 계획을 설명한다.
-[9영02-05] 친숙한 주제에 관해 일이나 사건의 논리적 관계를 설명한다.
-[9영02-06] 친숙한 주제에 관해 자신의 의견을 주장한다.
-[9영02-07] 친숙한 주제에 관해 듣거나 읽고 내용을 요약한다.
-[9영02-08] 간단한 일기, 편지, 이메일 등의 글을 쓴다.
-[9영02-09] 적절한 매체를 활용하여 정보 윤리를 준수하며 말하거나 쓴다.
-[9영02-10] 적절한 전략을 활용하여 상황이나 목적에 맞게 말하거나 쓴다.
-[9영02-11] 상대방을 배려하는 태도로 말하거나 쓴다.
-`;
-        rawStandardsText += `
-성취기준(지리)_중학교
-
-[9사(지리)01-01] 세계 여러 지역의 특성을 해당 지역의 위치와 자연⋅인문환경을 고려하여 추론한다.
-[9사(지리)01-02] 다양한 스케일에서 지역이 서로 연계되어 있음을 공간적 상호 작용의 사례를 통해 파악한다.
-[9사(지리)01-03] 세계의 변화가 지역에 영향을 미치고 지역의 변화가 세계에 영향을 미치는 사례를 조사한다.
-[9사(지리)02-01] 다양한 지리 정보와 매체를 활용하여 아시아의 국가와 주요 도시의 위치를 파악하고 자연환경의 특성을 지도로 표현한다.
-[9사(지리)02-02] 종교와 관련된 아시아의 다양한 문화경관과 생활양식을 파악하고, 세계시민으로서 문화 다양성에 대한 이해와 수용성을 높인다.
-[9사(지리)02-03] 아시아의 인구 특징을 파악하고 지역별 인구 구조 변화를 비교하여 지역 발전의 가능성 및 변화 모습을 추론한다.
-[9사(지리)02-04] 글로컬 관점에서 아시아의 산업 특징과 변화를 파악하고, 이것이 우리나라 산업에 미치는 영향을 탐색한다.
-[9사(지리)03-01] 다양한 지리 정보와 매체를 활용하여 유럽의 국가와 주요 도시의 위치를 파악하고 자연환경의 특성을 지도로 표현한다.
-[9사(지리)03-02] 다양한 유형의 유럽 도시를 탐색하고, 기후위기에 대응하여 지속가능한 도시를 만들기 위한 노력을 조사한다.
-[9사(지리)03-03] 지역 간 역학관계에 따른 유럽의 통합과 분리의 움직임이 유럽연합의 변화와 주민 생활에 미치는 영향을 탐색한다.
-[9사(지리)04-01] 다양한 지리 정보와 매체를 활용하여 아프리카의 국가와 주요 도시의 위치를 파악하고 자연환경의 특성을 지도로 표현한다.
-[9사(지리)04-02] 아프리카의 지리적 특성에 기반한 다양한 문화와 지역 잠재력을 탐구하고, 아프리카에 대한 자신의 인식을 성찰한다.
-[9사(지리)04-03] 지속가능한 발전을 위한 아프리카 각 지역의 노력과 세계 다양한 주체들의 협력 사례를 조사하고, 세계시민으로서 우리가 참여할 수 있는 방안을 모색한다.
-[9사(지리)05-01] 다양한 지리 정보와 매체를 활용하여 아메리카의 국가와 주요 도시의 위치를 파악하고 자연환경의 특성을 지도로 표현한다.
-[9사(지리)05-02] 다양한 민족(인종)으로 구성된 아메리카의 인구 특징을 살펴보고, 사례를 들어 아메리카의 문화 혼종성을 설명한다.
-[9사(지리)05-03] 초국적 기업의 글로벌 생산체제에 대한 이해를 바탕으로, 초국적 기업의 아메리카 지역 내 입지와 해외 이전의 이유, 그에 따른 해당 지역의 변화를 분석한다.
-[9사(지리)06-01] 다양한 지리 정보와 매체를 활용하여 오세아니아의 국가와 주요 도시의 위치, 자연환경의 특성을 파악하고, 자원 수출을 중심으로 세계 다른 지역과의 상호연계성을 탐색한다.
-[9사(지리)06-02] 태평양 지역이 겪고 있는 환경 문제를 조사하고 그 해결에 참여할 수 있는 방안을 제안한다.
-[9사(지리)06-03] 극지방의 지리적 중요성과 지역 개발을 둘러싼 다양한 이해관계를 살펴보고, 이에 대한 자신과 상대방의 의견을 비판적으로 검토한다.
-[9사(지리)07-01] 우리 국토의 위치와 영역에 대한 이해를 바탕으로 세계 속에서 우리나라의 위치를 지정학, 지경학적 측면에서 탐색한다.
-[9사(지리)07-02] 우리나라 행정구역과 주요 도시의 위치를 파악하고, 자신이 살고 있는 곳의 장소성과 장소감을 표현한다.
-[9사(지리)07-03] 다양한 지리 정보와 매체를 활용하여 우리 지역의 문제를 선정하고 지리적으로 시각화한다.
-[9사(지리)08-01] 우리나라 주요 산지⋅하천⋅해안 지형의 위치와 특성을 파악하고, 매력적인 지형 경관을 탐색하여 우리 국토의 아름다움을 느낀다.
-[9사(지리)08-02] 우리나라의 계절별, 지역별 기후 특성 및 변화 양상을 파악하고, 기후변화에 대한 지역별 대응 노력을 조사한다.
-[9사(지리)08-03] 우리나라 자연재해의 지리적 특성과 피해 최소화를 위한 노력을 파악하고, 일상생활 속 다양한 상황에서 자연재해 발생 시 자신의 대처 방안을 탐색한다.
-[9사(지리)09-01] 다양한 지리 정보와 매체를 활용하여 중부 지역의 지리적 특성 및 매력적인 여행 장소들을 탐색한다.
-[9사(지리)09-02] 수도권의 공간 구조를 파악하고, 인구⋅문화⋅경제적 측면을 중심으로 수도권의 변화 양상을 탐색한다.
-[9사(지리)09-03] 강원⋅충청 지역의 변화를 교통 발달과 수도권과의 관계를 중심으로 파악하고, 강원⋅충청 지역의 산업 변화와 지역경제 활성화를 위한 노력을 조사한다.
-[9사(지리)09-04] 수도권과 비수도권 간의 지역 불균형 실태를 지도로 표현하고, 지역 불균형을 완화하기 위한 방안들을 제안한다.
-[9사(지리)10-01] 다양한 지리 정보와 매체를 활용하여 남부 지역의 지리적 특성 및 매력적인 여행 장소들을 탐색한다.
-[9사(지리)10-02] 글로벌 경제와 우리나라 산업에서 영⋅호남 공업 지역의 위상을 파악하고, 영⋅호남 지역의 산업 변화와 당면 과제를 조사한다.
-[9사(지리)10-03] 제주도의 지역 변화와 이를 둘러싼 다양한 가치를 살펴보고 이에 대한 자신과 상대방의 의견을 비판적으로 검토한다.
-[9사(지리)11-01] 다양한 지리 정보와 매체를 활용하여 북한의 자연환경과 인문환경의 특징을 탐색한다.
-[9사(지리)11-02] 분단이 우리의 일상생활에 미친 영향을 살펴보고, 분리와 연결의 공간으로서 접경지역의 다양한 모습을 세계 여러 지역의 사례를 통해 비교한다.
-[9사(지리)11-03] 세계시민의 관점에서 한반도 평화의 중요성을 논의하고, 한반도 평화와 통일 환경 속에서 우리의 삶과 국토의 미래를 구상한다.
-[9사(지리)12-01] 우리나라 주요 식량 자원 및 에너지 자원의 소비 현황과 수입국 현황을 분석하여 이와 관련된 문제를 파악하고, 자원의 지속가능한 확보 방안을 모색한다.
-[9사(지리)12-02] 지역 개발과 환경 보존을 둘러싼 글로컬 환경 이슈에 관심을 가지고 자신의 웰빙 및 공동체의 지속가능한 발전을 위해 참여하고 실천한다.
-[9사(지리)12-03] 더 나은 지역을 만들어 가는 사람들의 노력을 국내외 사례를 통해 살펴보고, 자신이 사는 지역의 문제를 해결하기 위한 방안을 모색하고 이를 실천한다.
-
-
-성취기준(미술)_중학교
-
-[9미01-01] 감각을 활용하여 대상과 현상을 탐색하고 자신과 환경에 대한 감수성을 확장할 수 있다.
-[9미01-02] 시각 문화의 의미와 역할을 알고 이미지를 비판적으로 해석할 수 있다.
-[9미01-03] 다양한 문화를 존중하며 이미지를 활용하여 소통할 수 있다.
-[9미01-04] 삶과 미술의 관계를 이해하고 다양한 분야와의 연결 방안을 모색할 수 있다.
-[9미02-01] 주제를 탐구하고 의도를 반영하여 적합한 표현을 계획할 수 있다.
-[9미02-02] 주도적이고 도전적인 태도로 다양한 미술 표현을 실험하고 작품에 적용할 수 있다.
-[9미02-03] 조형 요소와 원리, 표현 재료와 방법, 디지털 매체를 포함한 다양한 매체를 활용하여 주제를 효과적으로 표현할 수 있다.
-[9미02-04] 자신과 타인의 작품을 존중하며, 다양한 방법으로 공유하고 소통할 수 있다.
-[9미02-05] 미술 표현 과정에서의 경험을 성찰하고 삶의 문제 해결에 활용할 수 있다.
-[9미03-01] 미술의 시대적, 지역적, 사회적 맥락을 이해하고 설명할 수 있다.
-[9미03-02] 작품의 내용과 형식을 분석하고 미술 용어와 지식을 활용하여 설명할 수 있다.
-[9미03-03] 다양한 감상 방법과 관점을 활용하여 작품을 해석할 수 있다.
-[9미03-04] 미술의 다원성에 대한 존중을 바탕으로 미술 감상 경험을 삶과 연결하고 공동체 문화에 기여할 수 있다.
-
-
-성취기준(과학)_중학교
-
-[9과01-01] 과학적 탐구 방법을 이해하고, 일상생활의 문제에 대한 과학적 해결 방안을 제안할 수 있다.
-[9과01-02] 과학의 발전이 인류 문명에 미친 영향을 이해하고, 인공지능 등 첨단 과학기술이 가져올 미래 사회의 변화를 조사하여 발표할 수 있다.
-[9과01-03] 인류의 지속가능한 삶을 위한 과학기술의 중요성과 역할에 대해 토의하고, 개인과 사회 차원의 활동 방안을 찾아 실천할 수 있다.
-[9과02-01] 세포는 생명 활동이 일어나는 기본 단위임을 이해하고, 세포의 구조와 기능의 관계를 추론할 수 있다.
-[9과02-02] 생물의 유기적 구성 단계를 이해하고, 동물과 식물을 비교하여 분석할 수 있다.
-[9과02-03] 생물다양성을 이해하고, 변이와 생물다양성의 관계를 추론할 수 있다.
-[9과02-04] 종의 개념과 분류 체계를 이해하고, 생물을 계 수준에서 분류할 수 있다.
-[9과02-05] 생물다양성 보전의 필요성을 이해하고, 생물다양성 유지를 위한 방안을 조사하고 실천할 수 있다.
-[9과03-01] 온도와 열평형 과정을 물질을 구성하는 입자들의 배치나 움직임 등으로 설명할 수 있다.
-[9과03-02] 열은 전도, 대류, 복사로 전달됨을 알고, 열전달 과정을 모형 등을 사용하여 다양하게 표현할 수 있다.
-[9과03-03] 물질에 따라 비열과 열팽창 정도가 다름을 알고, 이러한 성질이 일상생활에서 유용하게 활용됨을 인식할 수 있다.
-[9과04-01] 확산 및 증발 현상을 관찰하여 물질을 구성하는 입자가 운동하고 있음을 추론할 수 있다.
-[9과04-02] 물질의 세 가지 상태의 특징을 설명하고, 이를 입자 모형으로 표현할 수 있다.
-[9과04-03] 여러 가지 물질의 상태 변화를 관찰하고, 이를 입자 모형으로 설명할 수 있다.
-[9과04-04] 물질의 상태 변화와 열에너지 출입 관계를 이해하고, 이를 실생활에 적용하여 과학의 유용성을 인식할 수 있다.
-[9과05-01] 물체에 작용하는 힘을 화살표를 이용하여 나타내고, 힘의 평형을 이루는 조건을 설명할 수 있다.
-[9과05-02] 중력, 탄성력, 마찰력, 부력을 이해하고, 각 힘의 특징을 크기와 방향으로 설명할 수 있다.
-[9과05-03] 알짜힘이 0이 아닐 때 물체의 운동 상태가 변함을 알고, 그 예를 조사하여 분류할 수 있다.
-[9과05-04] 다양한 사례에서 작용하는 힘과 힘의 평형 관계를 설명하고, 일상생활에서 힘의 특징을 이용한 기구나 장치를 설계할 수 있다.
-[9과06-01] 압력의 의미를 알고, 기체의 압력을 입자의 운동으로 설명할 수 있다.
-[9과06-02] 기체의 압력과 부피 관계를 실험 결과로부터 알아내고, 이를 입자 모형으로 해석할 수 있다.
-[9과06-03] 기체의 온도와 부피 관계를 실험 결과로부터 알아내고, 이를 입자 모형으로 해석할 수 있다.
-[9과07-01] 태양계를 구성하는 천체의 특징을 알고, 행성을 목성형 행성과 지구형 행성으로 구분할 수 있다.
-[9과07-02] 태양의 표면과 대기에서 일어나는 현상을 알고, 태양의 활동이 지구에 미치는 영향을 추론할 수 있다.
-[9과07-03] 지구 자전에 의한 천체의 겉보기 운동과 지구 공전에 의한 별자리 변화를 이해하고, 밤하늘 천체에 호기심을 가진다.
-[9과07-04] 달을 관측하여 달의 위상변화 원리를 이해하고, 일식과 월식을 설명할 수 있다.
-[9과08-01] 물질의 특성의 의미를 알고, 실험을 통해 밀도, 용해도, 녹는점, 끓는점 등을 설명할 수 있다.
-[9과08-02] 물질의 특성을 근거로 우리 주변의 물질을 순물질과 혼합물로 분류할 수 있다.
-[9과08-03] 물질의 특성을 이용하여 혼합물이 분리되는 원리를 이해하고, 이를 이용한 사례를 주변에서 찾을 수 있다.
-[9과09-01] 지구계의 구성 요소를 알고, 지권의 층상 구조와 그 특징을 조사⋅발표할 수 있다.
-[9과09-02] 조암 광물의 주요 특성을 관찰하고, 암석과 광물의 활용 방안 및 자원으로서 가치에 대해 조사할 수 있다.
-[9과09-03] 지각을 이루는 암석을 생성 과정에 따라 분류하고, 암석의 순환 과정을 설명할 수 있다.
-[9과09-04] 풍화 과정을 이해하고, 토양 생성 과정을 풍화 작용의 예로 설명할 수 있다.
-[9과09-05] 대륙이동설을 이해하고, 지진과 화산이 발생하는 지역의 분포를 판의 경계와 관련지어 설명할 수 있다.
-[9과10-01] 빛의 반사와 굴절의 원리를 이해하고, 물체를 보는 과정을 빛의 경로를 이용하여 표현할 수 있다.
-[9과10-02] 평면거울에서 상이 생기는 원리를 설명하고, 일상생활에서 사용되는 거울과 렌즈의 종류를 분류하고 상의 특징을 비교할 수 있다.
-[9과10-03] 물체의 색을 빛의 반사와 관련지어 설명하고, 영상 장치에서 빛의 합성을 이용하여 다양한 색이 표현되는 원리를 이해할 수 있다.
-[9과10-04] 파동의 발생과 전달 과정을 이해하고, 소리의 특성을 진폭, 진동수, 파형 등의 과학적 용어로 표현할 수 있다.
-[9과11-01] 원소와 화합물의 정의를 알고, 원소와 화합물을 화학식으로 표현할 수 있다.
-[9과11-02] 원소를 구성하는 입자인 원자는 양성자, 중성자, 전자로 구성되며, 양성자의 수에 따라 원소의 종류가 달라짐을 입자 모형을 활용하여 설명할 수 있다.
-[9과11-03] 원소는 양성자의 수에 따라 주기율표에 배치됨을 알고, 주기율표에서 성질이 유사한 원소를 찾을 수 있다.
-[9과11-04] 물질을 이루는 입자는 원자, 분자, 이온 등으로 존재할 수 있음을 알고, 이온은 전하를 띠고 있음을 설명할 수 있다.
-[9과12-01] 광합성 과정을 이해하고, 환경 요인과 광합성의 관계를 탐구하는 실험을 설계할 수 있다.
-[9과12-02] 식물의 호흡과 광합성의 관계를 이해하고, 호흡과 광합성 과정에서 출입하는 에너지와 물질의 변화를 분석할 수 있다.
-[9과12-03] 광합성 산물의 저장과 이용 과정을 이해하고, 모형으로 설명할 수 있다.
-[9과13-01] 소화계의 구조와 기능을 이해하고, 소화 과정을 소화 효소의 작용과 관련지어 추론할 수 있다.
-[9과13-02] 순환계의 구조와 기능을 이해하고, 혈액의 순환 경로를 종합하여 발표할 수 있다.
-[9과13-03] 호흡계의 구조와 기능을 이해하고, 호흡 운동의 원리를 나타내는 모형을 만들 수 있다.
-[9과13-04] 배설계의 구조와 기능을 이해하고, 노폐물이 배설되는 과정을 모식도로 표현할 수 있다.
-[9과13-05] 동물이 세포호흡을 통해 에너지를 얻는 과정을 소화, 순환, 호흡, 배설과 관련지어 통합적으로 설명할 수 있다.
-`;
-        rawStandardsText += `
-[9과14-01] 마찰 전기, 정전기 유도 현상을 관찰하고, 이를 전기력과 원자 모형을 이용하여 설명할 수 있다.
-[9과14-02] 전기 회로에서 전류를 모형으로 설명하고, 실험을 통해 저항, 전류, 전압 사이의 관계를 이끌어낼 수 있다.
-[9과14-03] 저항의 직렬연결과 병렬연결의 특징을 비교하고, 일상생활에서 전기 에너지가 다양한 형태의 에너지로 전환됨을 소비 전력과 관련지어 설명할 수 있다.
-[9과14-04] 자기장 안에 놓인 전류가 흐르는 코일이 받는 힘의 특성을 추리하고, 전동기 등 일상생활에서 활용한 예를 찾을 수 있다.
-[9과15-01] 연주시차를 이용하여 별까지의 거리를 구할 수 있고, 별의 등급과 밝기의 관계 및 표면 온도와 색의 관계를 설명할 수 있다.
-[9과15-02] 우리은하의 구조와 크기를 이해하고, 성운과 성단의 특징을 비교할 수 있다.
-[9과15-03] 모형을 이용하여 우주가 팽창하고 있음을 설명할 수 있다.
-[9과15-04] 우주탐사의 의의와 인류에게 미치는 영향을 조사하여 과학의 유용성을 인식할 수 있다.
-[9과16-01] 물리 변화와 화학 변화의 의미를 알고, 화학 변화에서 새로운 물질이 생성됨을 관찰할 수 있다.
-[9과16-02] 간단한 화학 반응을 화학 반응식으로 표현하고, 화학 반응식에서 계수의 비를 입자 수의 비로 해석할 수 있다.
-[9과16-03] 화학 반응에서 질량이 보존됨을 실험을 통해 추론할 수 있다.
-[9과16-04] 화합물을 구성하는 성분 원소의 질량비가 일정함을 실험 자료를 해석하여 설명할 수 있다.
-[9과16-05] 기체 반응에서 기체 부피 사이의 비가 일정함을 실험 자료를 해석하여 설명할 수 있다.
-[9과16-06] 화학 반응에서 열에너지가 출입함을 알고, 생활 속 사례를 조사하여 발표할 수 있다.
-[9과17-01] 지구 대기권을 4개 권역으로 구분하며, 온실효과와 지구온난화를 복사 평형의 관점으로 설명할 수 있다.
-[9과17-02] 대기 대순환에서 위도별 바람의 특성을 파악하고, 대기 대순환의 역할을 설명할 수 있다.
-[9과17-03] 상대습도, 단열 팽창 및 응결 현상의 관계를 이해하고, 구름의 생성과 강수 과정을 설명할 수 있다.
-[9과17-04] 기압, 기단, 전선의 개념을 이해하고, 일기도에서 저기압과 고기압의 분포에 따른 날씨를 해석할 수 있다.
-[9과18-01] 수권에서 해수, 담수, 빙하의 분포와 활용 사례를 조사하고, 자원으로서 물의 가치에 대해 토론할 수 있다.
-[9과18-02] 해수의 수온과 염분의 분포 및 변화를 해석하여 해수의 특성을 설명할 수 있다.
-[9과18-03] 대기 대순환과 해양 표층 순환과의 관계를 이해하고, 기후변화에 영향을 미치는 해류의 역할을 설명할 수 있다.
-[9과19-01] 직선상에서 움직이는 물체의 운동을 그래프로 나타내고 해석할 수 있다.
-[9과19-02] 자유 낙하하는 물체의 운동에서 시간에 따른 속력의 변화가 일정함을 분석할 수 있다.
-[9과19-03] 일의 정의를 알고, 자유 낙하하는 물체의 운동에서 중력이 한 일을 위치 에너지와 운동 에너지로 표현할 수 있다.
-[9과19-04] 물체의 운동에서 역학적 에너지의 전환과 보존을 이해하고, 이를 활용하여 일상생활 속 물체의 운동을 예측할 수 있다.
-[9과20-01] 감각기관의 구조와 기능을 이해하고, 실험을 통해 자극이 뇌로 전달되는 과정을 추론할 수 있다.
-[9과20-02] 뉴런과 신경계의 구조와 기능을 이해하고, 자극에서 반응이 일어나기까지의 과정을 모형으로 설명할 수 있다.
-[9과20-03] 우리 몸의 기능 조절에 호르몬이 관여함을 알고, 관련 자료를 조사하여 발표할 수 있다.
-[9과21-01] 개체의 생장에 세포분열이 필요한 이유를 세포의 표면적과 부피의 관계로 추론할 수 있다.
-[9과21-02] 염색체와 유전자의 관계를 이해하고, 체세포분열과 생식세포 형성과정의 특징을 염색체 행동을 중심으로 해석할 수 있다.
-[9과21-03] 수정란으로부터 개체가 발생하는 과정을 모형으로 표현할 수 있다.
-[9과21-04] 멘델 유전 실험의 의의와 원리를 이해하고, 멘델 유전 원리가 적용되는 유전 현상을 조사하여 협력적으로 소통할 수 있다.
-[9과21-05] 사람의 유전 형질과 유전 연구 방법을 알고, 가계도를 분석하여 사람의 유전 현상을 설명할 수 있다.
-[9과22-01] 재해⋅재난 사례와 관련된 자료를 조사하고, 그 발생 원인과 피해에 대해 과학적으로 분석할 수 있다.
-[9과22-02] 과학적 원리를 이용하여 재해⋅재난에 대한 대비 및 대처 방안을 세울 수 있다.
-[9과23-01] 과학과 관련된 직업의 종류와 하는 일을 조사하고, 과학기술의 발달로 생기는 미래 사회의 직업 변화를 예상할 수 있다.
-[9과23-02] 자신의 진로와 관련 있는 과학 분야를 조사하고, 진로 선택을 위하여 필요한 과학 학습을 계획할 수 있다.
-
-
-성취기준(진로)_중학교
-
-[9진로01-01] 진로와 직업의 의미를 이해하고 다양한 직업인의 진로 특성과 삶의 모습을 탐색한다.
-[9진로01-02] 다양한 방법으로 자신의 진로 특성을 파악하고 긍정적 자아 개념을 갖는다.
-[9진로01-03] 함께 일하고 싶은 직업인의 특성을 알아보고 바람직한 직업인의 자세를 갖는다.
-[9진로01-04] 일과 여가의 의미와 상호 관계를 이해하고 조화롭고 행복한 삶을 생각한다.
-[9진로02-01] 사회 변화에 따른 직업 세계의 변화를 이해한다.
-[9진로02-02] 진로 경로의 다양성과 가변성을 이해하고, 유연한 진로 탐색 태도를 함양한다.
-[9진로02-03] 진로 정보를 탐색하는 다양한 방법을 알아보고 관심 분야의 진로 정보를 탐색하고 활용한다.
-[9진로02-04] 다양한 경험과 진로 활동을 자신의 진로와 연계하며 주도적인 진로 탐색 태도를 함양한다.
-[9진로02-05] 고등학교의 유형, 특성, 교육과정에 대한 정보를 통해 교육 기회를 탐색한다.
-[9진로02-06] 창업의 특성과 창업가 정신을 이해하고 그 중요성을 인식한다.
-[9진로03-01] 진로의사결정의 방법과 고려 사항을 이해하고 진로를 잠정적으로 결정한다.
-[9진로03-02] 관심 진로 분야의 다양한 진로 경로를 탐색하고 자신의 진로 경로를 설정한다.
-[9진로03-03] 진로 목표 성취를 위해 학습의 필요성을 이해하고, 학습 계획을 자기 주도적으로 수립하여 실천한다.
-[9진로03-04] 졸업 이후의 진로 계획을 수립하고 자기 관리 및 진로 준비 방법을 알아보고 실천한다.
-
-
-성취기준(국어)_중학교
-
-[9국01-01] 화자의 의도와 관점을 추론하며 듣는다.
-[9국01-02] 설득 전략을 비판적으로 분석하며 듣는다.
-[9국01-03] 담화 공동체에 따른 듣기⋅말하기 방식의 다양성을 고려하여 듣고 말한다.
-[9국01-04] 상대의 말을 경청하고 상대의 감정과 입장에 공감하는 반응을 보이며 대화한다.
-[9국01-05] 면담의 다양한 목적과 상대를 고려하여 질문을 점검하고 효과적으로 면담한다.
-[9국01-06] 다양한 자료를 재구성하여 내용을 체계적으로 조직하고 청중이 이해하기 쉽게 발표한다.
-[9국01-07] 토의에서 다양한 의견을 교환하여 대안을 마련하고 문제를 해결한다.
-[9국01-08] 토론에서 반론을 고려하여 타당한 논증을 구성하고 논리적으로 반박한다.
-[9국01-09] 서로의 감정이나 바라는 바를 진솔하게 표현하면서 갈등을 조정한다.
-[9국01-10] 언어폭력의 문제점을 성찰하고, 서로를 존중하는 표현을 사용하여 말한다.
-[9국01-11] 듣기⋅말하기 과정을 점검하고 듣기⋅말하기의 어려움을 효과적으로 조정한다.
-[9국02-01] 읽기는 사회⋅문화적 맥락에서 의미를 구성하는 과정임을 이해하며 사회적 독서에 참여하고 사회적 독서 문화 형성에 기여한다.
-[9국02-02] 읽기 목적과 글의 구조를 고려하며 글을 효과적으로 요약한다.
-[9국02-03] 독자의 배경지식과 글에 나타난 정보 등을 활용하여 글에 드러나지 않은 의도나 관점을 추론하며 읽는다.
-[9국02-04] 복합양식으로 구성된 글이나 자료의 내용 타당성과 신뢰성, 표현 방법의 적절성을 평가하며 읽는다.
-[9국02-05] 글에 사용된 다양한 설명 방법과 논증 방법을 파악하고, 그 타당성을 평가하며 읽는다.
-[9국02-06] 동일한 화제를 다룬 여러 글이나 자료를 주제 통합적으로 읽는다.
-[9국02-07] 진로나 관심 분야에 대한 다양한 책이나 자료를 스스로 찾아 읽는다.
-[9국02-08] 자신의 독서 상황과 수준에 맞는 글을 선정하고 읽기 과정을 점검⋅조정하며 읽는다.
-[9국03-01] 대상의 특성에 적합한 설명 방법을 활용하여 글을 쓴다.
-[9국03-02] 복수의 자료를 활용하여 다양한 형식으로 정보를 전달하는 글을 쓴다.
-[9국03-03] 주장을 뒷받침할 수 있는 타당한 근거를 들고 적절한 표현을 사용하여 주장하는 글을 쓴다.
-[9국03-04] 의견 차이가 있는 사안에 대해 자료를 수집하고 사회⋅문화적 맥락을 고려하며 주장하는 글을 쓴다.
-[9국03-05] 자신의 삶과 경험을 바탕으로 정서를 진솔하게 표현하는 글을 쓴다.
-[9국03-06] 다양한 표현을 활용하여 자신의 생각과 느낌이 드러나는 글을 쓰고 독자와 공유한다.
-[9국03-07] 복합양식 자료를 활용하여 내용을 생성하고 글의 유형을 고려하여 내용을 조직하며 글을 쓴다.
-[9국03-08] 쓰기 과정과 전략을 점검⋅조정하며 글을 쓰고, 독자를 고려하여 글을 고쳐 쓴다.
-[9국03-09] 언어 공동체의 구성원인 필자로서 자신에 대해 성찰하며, 윤리적 소통 문화를 형성하는 데에 기여한다.
-[9국04-01] 국어의 음운 체계와 문자 체계를 이해하고 국어생활에 활용한다.
-[9국04-02] 단어의 짜임을 분석하여 새말 형성의 원리를 이해한다.
-[9국04-03] 품사의 종류와 특성을 이해하고 국어 자료를 분석한다.
-[9국04-04] 문장의 짜임을 이해하고 표현 효과를 고려하여 문장을 구성한다.
-[9국04-05] 피동 표현과 인용 표현의 의도와 효과를 분석하고 상황에 맞게 활용한다.
-[9국04-06] 한글 맞춤법의 기본 원리와 내용을 이해하고 국어생활에 적용한다.
-[9국04-07] 세대⋅분야⋅매체에 따른 어휘의 양상과 쓰임을 분석하고 다양한 집단과 사회의 언어에 관용적 태도를 지닌다.
-[9국04-08] 자신과 주변의 다양한 국어 실천 양상을 비판적으로 분석하여 언어와 자아 및 세계 사이의 관계를 인식한다.
-[9국05-01] 운율, 비유, 상징의 특성과 효과에 유의하며 작품을 감상하고 창작한다.
-[9국05-02] 갈등의 진행과 해결 과정을 파악하며 작품을 감상한다.
-[9국05-03] 인간의 성장을 다룬 작품을 읽으며 문학의 가치를 내면화한다.
-[9국05-04] 보는 이나 말하는 이의 특성과 효과를 파악하며 작품을 감상한다.
-[9국05-05] 작품에 반영된 사회⋅문화적 상황을 이해하며 작품을 감상한다.
-[9국05-06] 자신의 경험을 개성적인 발상과 표현으로 형상화한다.
-[9국05-07] 연관성이 있는 다른 작품들과의 관계를 파악하며 작품을 감상한다.
-[9국05-08] 근거를 바탕으로 작품을 해석하고, 다른 해석들과 비교하여 자신의 해석을 평가한다.
-[9국05-09] 문학을 통해 타자를 이해하고 공동체의 문제에 참여하는 태도를 지닌다.
-[9국06-01] 대중매체와 개인 인터넷 방송의 특성과 영향력을 비교한다.
-[9국06-02] 소통 맥락과 수용자 참여 양상을 고려하여 상호 작용적 매체를 분석한다.
-[9국06-03] 복합양식성을 고려하여 영상 매체 자료를 제작하고 공유한다.
-[9국06-04] 매체 소통에서의 권리와 책임을 이해하고, 수용자의 반응을 고려하며 매체 자료의 제작 과정을 성찰한다.
-[9국06-05] 매체 자료의 재현 방식을 이해하고 광고나 홍보물을 분석한다.
-[9국06-06] 사회⋅문화적 맥락을 고려하여 매체 자료의 공정성을 평가한다.
-`;
-
-        // TTL Data
-        const ttlData = `
-@prefix nc2022: <http://edudata.go.kr/curriculum/2022/> .
-@prefix edu: <http://example.org/ontology/collaboration/> .
-nc2022:9도정0101 edu:integratesWith nc2022:9국06-01, nc2022:9사_일사_02-01 .
-nc2022:9도정0102 edu:integratesWith nc2022:9과01-02, nc2022:9사_일사_12-01, nc2022:9진로02-01 .
-nc2022:9도정0103 edu:supports nc2022:9국02-01, nc2022:9사_지리_07-02 .
-nc2022:9도정0104 edu:overlapsWith nc2022:9도02-03, nc2022:9국06-04, nc2022:9영02-09 .
-nc2022:9도정0105 edu:leadsTo nc2022:9국06-02, nc2022:9미01-02 .
-nc2022:9도정0201 edu:methodFor nc2022:9과01-01, nc2022:9국03-08 .
-nc2022:9도정0202 edu:supports nc2022:9과23-02, nc2022:9사_일사_04-03, nc2022:9진로02-04 .
-nc2022:9도정0203 edu:essentialFor nc2022:9사_지리_02-01, nc2022:9사_지리_09-01, nc2022:9영01-10 .
-nc2022:9도정0204 edu:connects nc2022:9진로02-03, nc2022:9진로03-02, nc2022:9미01-04 .
-nc2022:9도정0205 edu:refines nc2022:9국02-08, nc2022:9과22-01 .
-nc2022:9도정0301 edu:analyzes nc2022:9국02-03, nc2022:9도01-04 .
-nc2022:9도정0302 edu:methodFor nc2022:9국02-05, nc2022:9영01-03, nc2022:9미03-02 .
-nc2022:9도정0303 edu:criticalFocus nc2022:9국02-04, nc2022:9사_일사_02-02, nc2022:9도03-07 .
-nc2022:9도정0304 edu:toolsFor nc2022:9과19-01, nc2022:9사_지리_12-01, nc2022:9미02-03 .
-nc2022:9도정0305 edu:recursiveProcess nc2022:9과11-03, nc2022:9사_일사_08-01 .
-nc2022:9도정0401 edu:presents nc2022:9국03-07, nc2022:9미02-01 .
-nc2022:9도정0402 edu:multimodalWith nc2022:9국06-03, nc2022:9미02-04, nc2022:9영02-02 .
-nc2022:9도정0403 edu:expresses nc2022:9국03-02, nc2022:9영02-07, nc2022:9미01-03 .
-nc2022:9도정0404 edu:emergingTech nc2022:9과01-02, nc2022:9사_일사_12-02 .
-nc2022:9도정0501 edu:ethicsIn nc2022:9국03-09, nc2022:9도01-07, nc2022:9영02-09 .
-nc2022:9도정0502 edu:ethicsIn nc2022:9도03-07, nc2022:9과01-03 .
-nc2022:9도정0503 edu:collaborates nc2022:9국01-07, nc2022:9과21-04, nc2022:9사_일사_11-03 .
-nc2022:9도정0504 edu:citizenship nc2022:9도03-06, nc2022:9사_일사_03-03, nc2022:9사_지리_11-03 .
-nc2022:9도정0505 edu:participates nc2022:9국02-01, nc2022:9사_지리_12-03, nc2022:9미03-04 .
-`;
-
-        // 1. Parse Full Database from Text
-        const database = {};
-
-        function parseDatabase() {
-            // Trim and split by newline; filter empty lines
-            const lines = rawStandardsText.trim().split('\n');
-            const regex = /^\[(.*?)\]\s*(.*)$/;
-
-            lines.forEach(line => {
-                line = line.trim();
-                const match = line.match(regex);
-                if (match) {
-                    let code = match[1];
-                    const desc = match[2];
-
-                    // Normalize code to match TTL format: 9사(일사)01-01 -> 9사_일사_01-01
-                    code = code.replace(/\(/g, '_').replace(/\)/g, '_');
-
-                    database[code] = desc;
-                }
-            });
-        }
-
-        // Execute immediately to be ready for graph generation
-        parseDatabase();
-
-        // 2. Vis.js Setup
-        const nodes = new vis.DataSet([]);
-        const edges = new vis.DataSet([]);
-        const addedNodes = new Set();
-
-        function addNode(id) {
-            if (addedNodes.has(id)) return;
-            let group = 'other';
-            let label = id.replace('nc2022:', '');
-
-            if (label.startsWith('9도정')) {
-                group = 'main';
-                // Add summary to label (max 15 chars)
-                const desc = database[label];
-                if (desc) {
-                    let summary = desc;
-                    if (summary.length > 15) summary = summary.substring(0, 15) + '...';
-                    label += '\n' + summary;
-                }
-            }
-
-            nodes.add({ id: id, label: label, group: group, title: 'Click for details' });
-            addedNodes.add(id);
-        }
-
-        // Predicate Translation Map
-        const predicateMap = {
-            'integratesWith': '통합',
-            'supports': '지원',
-            'overlapsWith': '공통',
-            'leadsTo': '연계',
-            'methodFor': '방법',
-            'essentialFor': '기초',
-            'connects': '연결',
-            'refines': '심화',
-            'analyzes': '분석',
-            'criticalFocus': '비판',
-            'toolsFor': '도구',
-            'recursiveProcess': '순환',
-            'presents': '발표',
-            'multimodalWith': '복합',
-            'expresses': '표현',
-            'emergingTech': '신기술',
-            'ethicsIn': '윤리',
-            'collaborates': '협력',
-            'citizenship': '시민성',
-            'participates': '참여'
-        };
-
-        function parseTTL(data) {
-            const lines = data.split('\n');
-            lines.forEach(line => {
-                line = line.trim();
-                if (!line || line.startsWith('#') || line.startsWith('@prefix')) return;
-                if (line.endsWith('.')) line = line.slice(0, -1).trim();
-                const parts = line.split(/\s+/);
-                if (parts.length < 3) return;
-                const subject = parts[0];
-                const predicateRaw = parts[1].replace('edu:', '');
-                const predicateLabel = predicateMap[predicateRaw] || predicateRaw; // Use translation
-
-                const objectPart = parts.slice(2).join(' ');
-                const objects = objectPart.split(',').map(s => s.trim());
-                addNode(subject);
-                objects.forEach(object => {
-                    addNode(object);
-                    edges.add({ from: subject, to: object, label: predicateLabel, arrows: 'to', font: { align: 'middle', size: 10, strokeWidth: 0, color: '#aaa' } });
-                });
-            });
-        }
-        parseTTL(ttlData);
-
-        const container = document.getElementById('network');
-        const data = { nodes: nodes, edges: edges };
-        const options = {
-            nodes: { shape: 'dot', size: 16, font: { face: 'Noto Sans KR', color: '#ffffff', size: 14, strokeWidth: 2, strokeColor: '#000000' }, borderWidth: 2 },
-            groups: {
-                main: { color: { background: '#000000', border: '#00f3ff', highlight: { border: '#ffffff', background: '#00f3ff' } }, shadow: { enabled: true, color: 'rgba(0, 243, 255, 0.6)', size: 15 }, size: 20 },
-                other: { color: { background: '#1a1f35', border: '#bc13fe', highlight: { border: '#ffffff', background: '#bc13fe' } }, shadow: { enabled: true, color: 'rgba(188, 19, 254, 0.5)', size: 10 } }
-            },
-            edges: { width: 1, color: { color: 'rgba(255, 255, 255, 0.2)', highlight: '#f9d71c' }, smooth: { type: 'continuous' } },
-            physics: { stabilization: false, barnesHut: { gravitationalConstant: -3000, springConstant: 0.04, springLength: 150 } },
-            interaction: { tooltipDelay: 200, hideEdgesOnDrag: true, hover: true }
-        };
-        const network = new vis.Network(container, data, options);
-
-        function getSubjectName(idCode) {
-            if (idCode.includes('도정')) return '도서관과 정보생활';
-            if (idCode.includes('국')) return '국어';
-            if (idCode.includes('도')) return '도덕';
-            if (idCode.includes('사_일사')) return '일반사회';
-            if (idCode.includes('사_지리')) return '지리';
-            if (idCode.includes('미')) return '미술';
-            if (idCode.includes('영')) return '영어';
-            if (idCode.includes('과')) return '과학';
-            if (idCode.includes('진로')) return '진로';
-            return '교과';
-        }
-
-        // Popup Logic
-        const popup = document.getElementById('infoPopup');
-        const popupContent = document.getElementById('popupContent');
-
-        function openPopupForNode(nodeId) {
-            const code = nodeId.replace('nc2022:', '');
-            let htmlContent = '';
-
-            const buildItem = (c, isMain) => {
-                const desc = database[c] || "설명이 없습니다.";
-                const subj = getSubjectName(c);
-                const borderStyle = isMain ? 'border-left: 3px solid var(--accent-cyan)' : 'border-left: 3px solid var(--accent-magenta)';
-                const titleColor = isMain ? 'var(--accent-cyan)' : 'var(--accent-magenta)';
-                return `<div style="margin-bottom: 20px; padding-left: 15px; ${borderStyle}; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 0 5px 5px 0;">
-                    <div style="color: ${titleColor}; font-weight: bold; font-size: 1rem; margin-bottom: 5px; display: flex; justify-content: space-between;">
-                        ${c} <span style="font-size: 0.7em; opacity: 0.8; color: #fff; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${subj}</span>
+                <div class="form-group">
+                    <label>성취기준 목록 (클릭하여 선택)</label>
+                    <div class="standard-list" id="subjectStandardsList">
+                        <div style="padding:1rem; color:#888;">교과를 먼저 선택해주세요.</div>
                     </div>
-                    <div style="font-size: 0.9rem; color: #ddd; line-height: 1.5;">${desc}</div>
-                </div>`;
-            };
+                </div>
 
-            htmlContent += buildItem(code, code.includes('도정'));
-            if (code.includes('도정')) {
-                const connectedIds = network.getConnectedNodes(nodeId);
-                if (connectedIds && connectedIds.length > 0) {
-                    htmlContent += '<div style="font-size: 0.85rem; color: #888; margin: 10px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Linked Standards</div>';
-                    connectedIds.forEach(connId => {
-                        htmlContent += buildItem(connId.replace('nc2022:', ''), false);
-                    });
+                <div class="btn-container">
+                    <div></div> <!-- Spacer -->
+                    <button class="btn btn-next" onclick="nextStep(2)">다음 단계 &rightarrow;</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Library Standard Selection -->
+            <div class="step-content" id="step2">
+                <h2>2. 학교도서관 성취기준 선택 (도정)</h2>
+                <div class="form-group">
+                    <label>정보활동 성취기준 목록 (클릭하여 선택)</label>
+                    <div class="standard-list" id="libStandardsList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-prev" onclick="prevStep(1)">&leftarrow; 이전</button>
+                    <button class="btn btn-next" onclick="nextStep(3)">다음 단계 &rightarrow;</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Context Definition -->
+            <div class="step-content" id="step3">
+                <h2>3. 삶의 맥락 설정</h2>
+                <p style="color:var(--text-sub); margin-bottom:1.5rem;">수업이 학생들의 실제 삶과 연결되도록 배경 맥락을 설정합니다.</p>
+
+                <div class="form-group">
+                    <label>추천 맥락 키워드 (선택 가능)</label>
+                    <div class="chip-container" id="contextChips">
+                        <div class="chip" onclick="selectContext('개인과 사회의 공동 행복')">개인과 사회의 공동 행복</div>
+                        <div class="chip" onclick="selectContext('정체성과 자기주도성')">정체성과 자기주도성</div>
+                        <div class="chip" onclick="selectContext('보편적 사회복지')">보편적 사회복지</div>
+                        <div class="chip" onclick="selectContext('포용력과 이해력')">포용력과 이해력</div>
+                        <div class="chip" onclick="selectContext('공감과 상호 협력')">공감과 상호 협력</div>
+                        <div class="chip" onclick="selectContext('생태 전환과 기후 변화')">생태 전환과 기후 변화</div>
+                        <div class="chip" onclick="selectContext('디지털 전환과 AI')">디지털 전환과 AI</div>
+                        <div class="chip" onclick="selectContext('책임 있는 민주시민')">책임 있는 민주시민</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="customContext">수업 맥락 / 주제 기술</label>
+                    <input type="text" id="customContext" placeholder="예: 생성형 AI를 활용한 나만의 진로 로드맵 설계">
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-prev" onclick="prevStep(2)">&leftarrow; 이전</button>
+                    <button class="btn btn-next" onclick="nextStep(4)">설계 시작 &rightarrow;</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Deep Lesson Design -->
+            <div class="step-content" id="step4">
+                <h2>4. 깊이 있는 수업 설계 (Deep Lesson Design)</h2>
+
+                <!-- Selected Standards Summary -->
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <div class="summary-label">선택된 교과 성취기준</div>
+                        <div class="summary-content" id="summarySubject">...</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">선택된 도서관 성취기준</div>
+                        <div class="summary-content" id="summaryLib">...</div>
+                    </div>
+                    <div class="summary-item" style="margin-bottom:0;">
+                        <div class="summary-label">삶의 맥락</div>
+                        <div class="summary-content" id="summaryContext">...</div>
+                    </div>
+                </div>
+
+                <div class="design-grid">
+                    <div class="form-group full-width">
+                        <label for="lessonTitle">수업 제목</label>
+                        <input type="text" id="lessonTitle" placeholder="창의적인 수업 제목을 입력하세요">
+                    </div>
+                </div>
+
+                <!-- Unit Design Section -->
+                <div
+                    style="background-color: #f0fdf4; padding: 1.5rem; border-radius: 0.5rem; margin-top: 1.5rem; border: 1px solid #bbf7d0;">
+                    <h3
+                        style="color: #15803d; margin-top: 0; border-bottom: 1px solid #bbf7d0; padding-bottom: 0.5rem;">
+                        Ⅰ.
+                        단원 수업 설계 (Unit Design)</h3>
+
+                    <div class="design-grid">
+                        <div class="form-group">
+                            <label for="bigIdeaLib">핵심 아이디어 - 도서관과 정보생활</label>
+                            <textarea id="bigIdeaLib" placeholder="도서관과 정보생활 단원의 핵심 개념"
+                                style="min-height: 80px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="bigIdeaSub">핵심 아이디어 - 협력교과</label>
+                            <textarea id="bigIdeaSub" placeholder="협력교과 단원의 핵심 개념" style="min-height: 80px;"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="design-grid">
+                        <div class="form-group full-width">
+                            <label>내용 요소 (Content Elements)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <!-- Library Side -->
+                                <div
+                                    style="background-color: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #bbf7d0;">
+                                    <div
+                                        style="font-weight: bold; margin-bottom: 0.75rem; color: #15803d; border-bottom: 1px solid #f0fdf4;">
+                                        ① 도서관과 정보생활</div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <input type="text" id="contentKnowledgeLib" placeholder="지식·이해 (도서관)">
+                                        <input type="text" id="contentProcessLib" placeholder="과정·기능 (도서관)">
+                                        <input type="text" id="contentValueLib" placeholder="가치·태도 (도서관)">
+                                    </div>
+                                </div>
+                                <!-- Subject Side -->
+                                <div
+                                    style="background-color: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #bbf7d0;">
+                                    <div
+                                        style="font-weight: bold; margin-bottom: 0.75rem; color: #15803d; border-bottom: 1px solid #f0fdf4;">
+                                        ② 협력교과</div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <input type="text" id="contentKnowledgeSub" placeholder="지식·이해 (교과)">
+                                        <input type="text" id="contentProcessSub" placeholder="과정·기능 (교과)">
+                                        <input type="text" id="contentValueSub" placeholder="가치·태도 (교과)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="graspsTask">평가 과제 (GRASPS)</label>
+                            <textarea id="graspsTask"
+                                placeholder="학생들이 수행해야 할 실제적인 과제는 무엇인가? (Goal, Role, Audience, Situation, Product, Standards)"
+                                style="min-height: 100px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Design Section -->
+                <div
+                    style="background-color: #eff6ff; padding: 1.5rem; border-radius: 0.5rem; margin-top: 1.5rem; border: 1px solid #bfdbfe;">
+                    <h3
+                        style="color: #1d4ed8; margin-top: 0; border-bottom: 1px solid #bfdbfe; padding-bottom: 0.5rem;">
+                        Ⅱ.
+                        차시별 세부 설계 (Session Design)</h3>
+
+                    <div class="design-grid">
+                        <div class="form-group">
+                            <label for="instructionalIntent">수업 의도 (Instructional Intent)</label>
+                            <textarea id="instructionalIntent" placeholder="이 수업을 통해 학생들이 무엇을 경험하고 배우기를 바라는가?"
+                                style="min-height: 435px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>탐구 질문 (Inquiry Question)</label>
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Factual Slot -->
+                                <div
+                                    style="background-color: #fff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem; box-shadow: var(--shadow-sm);">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="font-weight: bold; color: #1d4ed8; font-size: 0.9rem;">① 사실적 질문
+                                            (Factual)</span>
+                                        <button class="btn"
+                                            style="padding: 0.2rem 0.6rem; font-size: 0.75rem; background-color: #3b82f6; color: white;"
+                                            onclick="generateSpecificQuestion('factual')">🪄 생성</button>
+                                    </div>
+                                    <textarea id="qFactual" placeholder="사실적 질문을 입력하거나 생성하세요."
+                                        style="min-height: 60px; font-size: 0.9rem;"></textarea>
+                                </div>
+
+                                <!-- Conceptual Slot -->
+                                <div
+                                    style="background-color: #fff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem; box-shadow: var(--shadow-sm);">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="font-weight: bold; color: #1d4ed8; font-size: 0.9rem;">② 개념적 질문
+                                            (Conceptual)</span>
+                                        <button class="btn"
+                                            style="padding: 0.2rem 0.6rem; font-size: 0.75rem; background-color: #3b82f6; color: white;"
+                                            onclick="generateSpecificQuestion('conceptual')">🪄 생성</button>
+                                    </div>
+                                    <textarea id="qConceptual" placeholder="개념적 질문을 입력하거나 생성하세요."
+                                        style="min-height: 60px; font-size: 0.9rem;"></textarea>
+                                </div>
+
+                                <!-- Controversial Slot -->
+                                <div
+                                    style="background-color: #fff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem; box-shadow: var(--shadow-sm);">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <span style="font-weight: bold; color: #1d4ed8; font-size: 0.9rem;">③ 논쟁적 질문
+                                            (Controversial)</span>
+                                        <button class="btn"
+                                            style="padding: 0.2rem 0.6rem; font-size: 0.75rem; background-color: #3b82f6; color: white;"
+                                            onclick="generateSpecificQuestion('controversial')">🪄 생성</button>
+                                    </div>
+                                    <textarea id="qControversial" placeholder="논쟁적 질문을 입력하거나 생성하세요."
+                                        style="min-height: 60px; font-size: 0.9rem;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>깊이있는 수업 과정안 (Process Plan)</label>
+                        <div style="overflow-x: auto;">
+                            <table id="processTable"
+                                style="width: 100%; border-collapse: collapse; border: 1px solid #bfdbfe; font-size: 0.9rem;">
+                                <thead>
+                                    <tr style="background-color: #818cf8; color: white;">
+                                        <th rowspan="2" style="border: 1px solid #bfdbfe; padding: 0.5rem; width: 8%;">
+                                            차시
+                                        </th>
+                                        <th colspan="3" style="border: 1px solid #bfdbfe; padding: 0.5rem;">탐구-실행-성찰의 과정
+                                        </th>
+                                        <th rowspan="2" class="no-export"
+                                            style="border: 1px solid #bfdbfe; padding: 0.5rem; width: 5%;">
+                                            관리</th>
+                                    </tr>
+                                    <tr style="background-color: #a5b4fc; color: white;">
+                                        <th style="border: 1px solid #bfdbfe; padding: 0.5rem; width: 29%;">탐구·실행·성찰을 위한
+                                            수업 활동</th>
+                                        <th style="border: 1px solid #bfdbfe; padding: 0.5rem; width: 29%;">수업방법</th>
+                                        <th style="border: 1px solid #bfdbfe; padding: 0.5rem; width: 29%;">수업·평가 연계의
+                                            주안점</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="processTableBody">
+                                    <tr>
+                                        <td class="session-number"
+                                            style="border: 1px solid #bfdbfe; text-align: center; font-weight: bold; background-color: #f8fafc;">
+                                            1</td>
+                                        <td style="border: 1px solid #bfdbfe; padding: 0;">
+                                            <textarea class="cycle-activities"
+                                                placeholder="[수업 활동] 사실적 질문, 작품 감상, 내용 정리 등"
+                                                style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                                        </td>
+                                        <td style="border: 1px solid #bfdbfe; padding: 0;">
+                                            <textarea class="cycle-methods" placeholder="[수업방법] 협동학습, 프로젝트 기반 학습 등"
+                                                style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                                        </td>
+                                        <td style="border: 1px solid #bfdbfe; padding: 0;">
+                                            <textarea class="cycle-focus" placeholder="[주안점] 진단평가, 성취기준 연계, 경험 파악 등"
+                                                style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                                        </td>
+                                        <td class="no-export"
+                                            style="border: 1px solid #bfdbfe; text-align: center; background-color: #f8fafc;">
+                                            -
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn"
+                            style="width: 100%; margin-top: 0.5rem; background-color: #818cf8; color: white;"
+                            onclick="addSessionRow()">+ 차시 추가</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>수업 단계 (Steps)</label>
+                        <div
+                            style="border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; background-color: white;">
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-size: 0.9rem; color: var(--text-sub);">도입 (Introduction)</label>
+                                <input type="text" id="stepIntro" placeholder="동기 유발, 전시 학습 상기, 수업 목표 확인">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-size: 0.9rem; color: var(--text-sub);">전개 (Development)</label>
+                                <textarea id="stepDev" placeholder="주요 학습 활동, 학생 참여, 교사 지원"
+                                    style="min-height: 120px;"></textarea>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9rem; color: var(--text-sub);">정리 (Conclusion)</label>
+                                <input type="text" id="stepConcl" placeholder="학습 내용 정리, 차시 예고, 과제 제시">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-prev" onclick="prevStep(3)">&leftarrow; 이전 단계</button>
+                    <button class="btn btn-print" style="margin: 0 0.5rem; background-color: #818cf8;"
+                        onclick="printStep(4)">🖨 4단계 인쇄</button>
+                    <button class="btn btn-next" onclick="nextStep(5)">기본 과정 설계 완료 (5단계로) &rightarrow;</button>
+                </div>
+            </div>
+
+            <!-- Step 5: GRASPS Assessment Generator -->
+            <div class="step-content" id="step5">
+                <h2>5. 과제 설계 (GRASPS)</h2>
+                <p style="color:var(--text-sub); margin-bottom:1.5rem;">성취기준을 바탕으로 실제적인 수행평가 과제를 디자인합니다.</p>
+
+                <div class="no-export"
+                    style="margin-bottom: 2rem; padding: 1rem; background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <strong style="color: #92400e;">🪄 GRASPS 자동 생성기</strong>
+                        <div style="font-size: 0.85rem; color: #b45309;">선택한 성취기준을 맥락에 맞게 조합하여 시나리오를 구성합니다.</div>
+                    </div>
+                    <button class="btn" style="background-color: var(--accent-color); color: white;"
+                        onclick="generateGRASPS()">시나리오 생성하기</button>
+                </div>
+
+                <div class="design-grid">
+                    <div class="form-group">
+                        <label for="g_goal">목표 (Goal)</label>
+                        <textarea id="g_goal" placeholder="문제를 해결하거나 도전할 실제 상황의 목표"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="g_role">역할 (Role)</label>
+                        <textarea id="g_role" placeholder="학습자가 맡게 되는 실제 상황 속의 역할"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="g_audience">청중 (Audience)</label>
+                        <textarea id="g_audience" placeholder="결과물을 전달받거나 평가할 실제 대상"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="g_situation">상황 (Situation)</label>
+                        <textarea id="g_situation" placeholder="도전이 발생하는 구체적인 배경과 맥락"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="g_product">산출물 (Product)</label>
+                        <textarea id="g_product" placeholder="학습자가 최종적으로 만들어낼 결과물"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="g_standards">기준 (Standards)</label>
+                        <textarea id="g_standards" placeholder="성공적인 수행을 판단하는 명확한 기준"></textarea>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button class="btn btn-prev" onclick="prevStep(4)">&leftarrow; 이전 단계</button>
+                    <button class="btn btn-print" style="margin: 0 0.5rem; background-color: #818cf8;"
+                        onclick="printStep(5)">🖨 5단계 인쇄</button>
+                    <button class="btn btn-next" onclick="nextStep(6)">과제 설계 완료 (6단계로) &rightarrow;</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Rubric Design -->
+            <div class="step-content" id="step6">
+                <h2>6. 평가 루브릭 설계 (Rubric Design)</h2>
+                <p style="color:var(--text-sub); margin-bottom:1.5rem;">성취기준에 따른 수준별 수행 능력을 정의합니다.</p>
+
+                <div class="no-export"
+                    style="margin-bottom: 2rem; padding: 1rem; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <strong style="color: #0369a1;">🪄 루브릭 자동 생성기</strong>
+                        <div style="font-size: 0.85rem; color: #0c4a6e;">지식, 과정, 태도 차원의 루브릭을 성취기준 기반으로 생성합니다.</div>
+                    </div>
+                    <button class="btn" style="background-color: #0ea5e9; color: white;" onclick="generateRubric()">루브릭
+                        생성하기</button>
+                </div>
+
+                <div class="rubric-container" style="overflow-x: auto;">
+                    <table
+                        style="width: 100%; border-collapse: collapse; background-color: white; border: 1px solid var(--border-color);">
+                        <thead>
+                            <tr style="background-color: #f8fafc;">
+                                <th style="border: 1px solid var(--border-color); padding: 0.75rem; width: 20%;">평가 요소
+                                    (Criteria)</th>
+                                <th style="border: 1px solid var(--border-color); padding: 0.75rem; width: 26%;">상
+                                    (High)
+                                </th>
+                                <th style="border: 1px solid var(--border-color); padding: 0.75rem; width: 26%;">중 (Mid)
+                                </th>
+                                <th style="border: 1px solid var(--border-color); padding: 0.75rem; width: 26%;">하 (Low)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="rubricTableBody">
+                            <tr>
+                                <td
+                                    style="border: 1px solid var(--border-color); padding: 0.75rem; font-weight: bold; background-color: #f1f5f9;">
+                                    지식·이해</td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricK_H"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricK_M"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricK_L"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    style="border: 1px solid var(--border-color); padding: 0.75rem; font-weight: bold; background-color: #f1f5f9;">
+                                    과정·기능</td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricS_H"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricS_M"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricS_L"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    style="border: 1px solid var(--border-color); padding: 0.75rem; font-weight: bold; background-color: #f1f5f9;">
+                                    가치·태도</td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricA_H"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricA_M"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                                <td style="border: 1px solid var(--border-color); padding: 0;"><textarea id="rubricA_L"
+                                        style="width:100%; border:none; height:120px; padding:0.5rem; resize:vertical;"></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="btn-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-prev" onclick="prevStep(5)">&leftarrow; 이전 단계</button>
+                    <button class="btn btn-print" style="background-color: #818cf8;" onclick="printStep(6)">🖨 6단계(루브릭)
+                        인쇄</button>
+                    <button class="btn btn-print" style="background-color: #10b981; flex-grow: 1;"
+                        onclick="downloadIntegratedPlan()">💾 설계안 통합 다운로드 (.html)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0;">🔗 참고링크 관리</h3>
+                <button onclick="closeAdminModal()"
+                    style="border:none; background:none; cursor:pointer; font-size:1.5rem;">&times;</button>
+            </div>
+
+            <div class="manage-list" id="manageList">
+                <!-- Editable link items -->
+            </div>
+
+            <div style="background:#f1f5f9; padding:1rem; border-radius:0.5rem; margin-top:1rem;">
+                <h4 style="margin-top:0; font-size:0.9rem;">새 링크 추가</h4>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <input type="text" id="newLinkName" placeholder="사이트 명칭 (예: 국가교육과정센터)">
+                    <input type="text" id="newLinkSub" placeholder="설명 (예: 교육과정 원문 데이터)">
+                    <input type="text" id="newLinkUrl" placeholder="URL (https://...)">
+                    <button class="btn" onclick="addLink()" style="width:100%; margin-top:0.5rem;">추가하기</button>
+                </div>
+            </div>
+
+            <div style="margin-top:1.5rem; text-align:right;">
+                <button class="btn" style="background:var(--text-sub);" onclick="closeAdminModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // State
+        let currentStep = 1;
+        let selectedSubject = '';
+        let selectedSubjectStd = null;
+        let selectedLibStd = null;
+        let contextText = '';
+
+        // Reference Links State
+        const DEFAULT_LINKS = [
+            { name: '국가교육과정센터', sub: '교육과정 원문 데이터', url: 'https://ncic.re.kr/inv/org/list.do' },
+            { name: '협력수업 성취기준 연결망', sub: '시각화 탐색 도구', url: 'https://wata1593.github.io/test/' },
+            { name: '책쓰기 수업 도구', sub: '글쓰기 교육 솔루션', url: 'https://wata1593.github.io/Student-Author-Project/' }
+        ];
+        let refLinks = JSON.parse(localStorage.getItem('refLinks')) || DEFAULT_LINKS;
+
+        // Initialization
+        window.onload = function () {
+            populateSubjectDropdown();
+            renderLibraryStandards();
+            renderRefLinks();
+        };
+
+        // --- Link Management Functions ---
+        function renderRefLinks() {
+            const container = document.getElementById('dynamicLinks');
+            container.innerHTML = refLinks.map((link, idx) => `
+                <a href="${link.url}" target="_blank" class="ref-link">
+                    <span>${link.sub}</span>
+                    ${idx + 1}) ${link.name}
+                </a>
+            `).join('');
+        }
+
+        function openAdminModal() {
+            const password = prompt('관리자 비밀번호를 입력하세요.');
+            if (password === '1593') {
+                document.getElementById('adminModal').style.display = 'flex';
+                renderManageList();
+            } else if (password !== null) {
+                alert('비밀번호가 틀렸습니다.');
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function renderManageList() {
+            const list = document.getElementById('manageList');
+            list.innerHTML = refLinks.map((link, idx) => `
+                <div class="link-item-edit">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                        <span style="font-weight:bold; font-size:0.9rem;">${idx + 1}. ${link.name}</span>
+                        <button class="btn-danger" onclick="deleteLink(${idx})">삭제</button>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-sub); word-break:break-all;">
+                        <div>설명: ${link.sub}</div>
+                        <div>URL: ${link.url}</div>
+                    </div>
+                </div>
+            `).join('');
+            if (refLinks.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:0.9rem;">등록된 링크가 없습니다.</p>';
+            }
+        }
+
+        function addLink() {
+            const name = document.getElementById('newLinkName').value.trim();
+            const sub = document.getElementById('newLinkSub').value.trim();
+            const url = document.getElementById('newLinkUrl').value.trim();
+
+            if (!name || !url) {
+                alert('명칭과 URL은 필수 입력 항목입니다.');
+                return;
+            }
+
+            refLinks.push({ name, sub, url });
+            saveAndRefreshLinks();
+
+            // Clear inputs
+            document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkSub').value = '';
+            document.getElementById('newLinkUrl').value = '';
+        }
+
+        function deleteLink(idx) {
+            if (confirm('이 링크를 삭제하시겠습니까?')) {
+                refLinks.splice(idx, 1);
+                saveAndRefreshLinks();
+            }
+        }
+
+        function saveAndRefreshLinks() {
+            localStorage.setItem('refLinks', JSON.stringify(refLinks));
+            renderRefLinks();
+            renderManageList();
+        }
+
+        function addSessionRow() {
+            const tbody = document.getElementById('processTableBody');
+            const rowCount = tbody.rows.length;
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+                <td class="session-number" style="border: 1px solid #bfdbfe; text-align: center; font-weight: bold; background-color: #f8fafc;">
+                    ${rowCount + 1}
+                </td>
+                <td style="border: 1px solid #bfdbfe; padding: 0;">
+                    <textarea class="cycle-activities" placeholder="[수업 활동]" style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                </td>
+                <td style="border: 1px solid #bfdbfe; padding: 0;">
+                    <textarea class="cycle-methods" placeholder="[수업방법]" style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                </td>
+                <td style="border: 1px solid #bfdbfe; padding: 0;">
+                    <textarea class="cycle-focus" placeholder="[주안점]" style="width: 100%; border: none; min-height: 120px; padding: 0.5rem; resize: vertical; display: block;"></textarea>
+                </td>
+                <td class="no-export" style="border: 1px solid #bfdbfe; text-align: center; background-color: #f8fafc;">
+                    <button type="button" class="btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="removeSessionRow(this)">삭제</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeSessionRow(btn) {
+            const row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+
+            // Re-index remaining rows
+            const rows = document.querySelectorAll('#processTableBody .session-number');
+            rows.forEach((td, idx) => {
+                td.textContent = idx + 1;
+            });
+        }
+
+        function populateSubjectDropdown() {
+            const select = document.getElementById('subjectSelect');
+            // Excluding '도서관/정보 (도정)' from subject dropdown as it is separate
+            const subjects = Object.keys(standardsData).filter(s => !s.includes('도서관'));
+
+            subjects.forEach(subject => {
+                const opt = document.createElement('option');
+                opt.value = subject;
+                opt.textContent = subject;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderSubjectStandards() {
+            const subject = document.getElementById('subjectSelect').value;
+            const container = document.getElementById('subjectStandardsList');
+            container.innerHTML = '';
+
+            if (!subject) {
+                container.innerHTML = '<div style="padding:1rem; color:#888;">교과를 먼저 선택해주세요.</div>';
+                return;
+            }
+
+            const standards = standardsData[subject];
+            standards.forEach(std => {
+                const el = document.createElement('div');
+                el.className = 'standard-item';
+                if (selectedSubjectStd && selectedSubjectStd.code === std.code) {
+                    el.classList.add('selected');
                 }
-            }
-            popupContent.innerHTML = htmlContent;
-            popup.style.display = "flex";
+
+                el.innerHTML = `
+                    <div class="code-badge">${std.code}</div>
+                    <div>${std.desc}</div>
+                `;
+
+                el.onclick = () => {
+                    // Deselect others
+                    document.querySelectorAll('#subjectStandardsList .standard-item').forEach(i => i.classList.remove('selected'));
+                    el.classList.add('selected');
+                    selectedSubjectStd = std;
+                    selectedSubject = subject;
+                };
+
+                container.appendChild(el);
+            });
         }
 
-        network.on("click", function (params) {
-            if (params.nodes.length > 0) openPopupForNode(params.nodes[0]);
-            else popup.style.display = "none";
-        });
-        function closePopup() { popup.style.display = "none"; }
+        function renderLibraryStandards() {
+            const container = document.getElementById('libStandardsList');
+            // Assuming "도서관/정보 (도정)" key exists as per data file creation
+            const standards = standardsData["도서관/정보 (도정)"];
 
-        // Chatbot Logic
-        const chatWindow = document.getElementById('chatWindow');
-        const chatBody = document.getElementById('chatBody');
-        const chatInput = document.getElementById('chatInput');
-        let isChatOpen = false;
+            if (!standards) return;
 
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            if (isChatOpen) {
-                chatWindow.classList.add('open');
-                setTimeout(() => chatInput.focus(), 300);
-            } else {
-                chatWindow.classList.remove('open');
-            }
-        }
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
-        function addMessage(text, type) {
-            const div = document.createElement('div');
-            div.className = `message msg-${type}`;
-            div.innerHTML = text;
-            chatBody.appendChild(div);
-            // Limit history
-            if (chatBody.children.length > 50) chatBody.removeChild(chatBody.firstChild);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-            addMessage(text, 'user');
-            chatInput.value = '';
-
-            const query = text.toLowerCase();
-            const matches = [];
-
-            // Search in global database
-            for (const [code, desc] of Object.entries(database)) {
-                if (code.toLowerCase().includes(query) || desc.toLowerCase().includes(query)) {
-                    matches.push({ code, desc });
+            standards.forEach(std => {
+                const el = document.createElement('div');
+                el.className = 'standard-item';
+                if (selectedLibStd && selectedLibStd.code === std.code) {
+                    el.classList.add('selected');
                 }
+
+                el.innerHTML = `
+                    <div class="code-badge">${std.code}</div>
+                    <div>${std.desc}</div>
+                `;
+
+                el.onclick = () => {
+                    document.querySelectorAll('#libStandardsList .standard-item').forEach(i => i.classList.remove('selected'));
+                    el.classList.add('selected');
+                    selectedLibStd = std;
+                };
+
+                container.appendChild(el);
+            });
+        }
+
+        function selectContext(text) {
+            document.getElementById('customContext').value = text;
+            // Visual feedback on chips
+            document.querySelectorAll('.chip').forEach(c => {
+                if (c.textContent === text) c.classList.add('selected');
+                else c.classList.remove('selected');
+            });
+        }
+
+        function nextStep(step) {
+            // Validation
+            if (step === 2 && !selectedSubjectStd) {
+                alert('교과 성취기준을 선택해주세요.');
+                return;
             }
+            if (step === 3 && !selectedLibStd) {
+                alert('도서관 성취기준을 선택해주세요.');
+                return;
+            }
+            if (step === 4) {
+                const ctx = document.getElementById('customContext').value;
+                if (!ctx.trim()) {
+                    alert('삶의 맥락을 입력하거나 선택해주세요.');
+                    return;
+                }
+                contextText = ctx;
+                updateSummary();
+            }
+
+            // Transition
+            document.getElementById(`ind-${currentStep}`).classList.remove('active');
+            document.getElementById(`ind-${currentStep}`).classList.add('completed');
+
+            currentStep = step;
+            showStep(currentStep);
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step-indicator').forEach(i => i.classList.remove('active'));
+
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`ind-${step}`).classList.add('active');
+        }
+
+        function printStep(n) {
+            const printClass = `print-step-${n}`;
+
+            // Auto-expand textareas for printing (to prevent clipping)
+            const textareas = document.querySelectorAll('textarea');
+            const originalHeights = [];
+            textareas.forEach(ta => {
+                originalHeights.push(ta.style.height);
+                ta.style.height = 'auto'; // Reset
+                ta.style.height = (ta.scrollHeight + 2) + 'px'; // Set to full content height
+            });
+
+            document.body.classList.add(printClass);
+
+            // Use a slight timeout to ensure styles are applied
+            setTimeout(() => {
+                window.print();
+                document.body.classList.remove(printClass);
+                // Restore original heights
+                textareas.forEach((ta, i) => {
+                    ta.style.height = originalHeights[i];
+                });
+            }, 50);
+        }
+
+        function printAll() {
+            // Auto-expand textareas for printing
+            const textareas = document.querySelectorAll('textarea');
+            const originalHeights = [];
+            textareas.forEach(ta => {
+                originalHeights.push(ta.style.height);
+                ta.style.height = 'auto';
+                ta.style.height = (ta.scrollHeight + 2) + 'px';
+            });
+
+            document.body.classList.add('print-all');
 
             setTimeout(() => {
-                if (matches.length === 0) {
-                    addMessage(`'${text}'에 대한 검색 결과가 없어요. 😢`, 'bot');
-                } else {
-                    let resultHtml = `총 ${matches.length}건을 찾았어요! 👇<br>`;
-                    // Limit display to 20
-                    const displayMatches = matches.slice(0, 20);
-
-                    displayMatches.forEach(m => {
-                        const nodeId = 'nc2022:' + m.code;
-                        const exists = addedNodes.has(nodeId); // Check if node exists in graph using addedNodes set
-                        const clickAttr = exists ? `onclick="focusNode('${nodeId}')"` : 'class="search-result no-link"';
-                        const extraStyle = exists ? '' : 'style="cursor:default; opacity:0.7;"';
-
-                        resultHtml += `<span class="search-result" ${clickAttr} ${extraStyle}>
-                            <strong>${m.code}</strong> ${exists ? '🔗' : ''}<br>
-                            <span style="font-size:0.8em; opacity:0.8;">${m.desc.substring(0, 40)}...</span>
-                        </span>`;
-                    });
-
-                    if (matches.length > 20) {
-                        resultHtml += `<div style="text-align:center; font-size:0.8rem; margin-top:5px; color:#aaa;">외 ${matches.length - 20}건 더 있음...</div>`;
-                    }
-
-                    addMessage(resultHtml, 'bot');
-                }
-            }, 300);
+                window.print();
+                document.body.classList.remove('print-all');
+                textareas.forEach((ta, i) => {
+                    ta.style.height = originalHeights[i];
+                });
+            }, 50);
         }
 
-        function focusNode(nodeId) {
-            network.focus(nodeId, { scale: 1.5, animation: { duration: 1000, easingFunction: 'easeInOutQuad' } });
-            network.selectNodes([nodeId]);
-            openPopupForNode(nodeId);
+        function prevStep(step) {
+            document.getElementById(`ind-${currentStep}`).classList.remove('active');
+            document.getElementById(`ind-${currentStep}`).classList.remove('completed');
+
+            currentStep = step;
+            showStep(currentStep);
         }
 
-        // Initialize Call
-        // Defer until text is injected
-        window.onload = function () {
-            if (rawStandardsText) {
-                parseDatabase();
+        // Questions Data from Ontology (Reclassified into 3 types)
+        const questionTypes = {
+            factual: {
+                label: " 사실적 질문",
+                characteristic: "특정한 사실이나 정답을 요구하며, 지식을 확인하는 질문",
+                templates: ["{대상}의 정의는 무엇인가?", "{사건}은 언제 일어났는가?", "{과정}을 순서대로 나열한다면?", "{수치} 혹은 {결과}는 무엇인가?"]
+            },
+            conceptual: {
+                label: "개념적 질문",
+                characteristic: "개념 간의 관계를 탐구하고 원리를 이해하는 질문",
+                templates: ["{개념A}와 {개념B}는 어떤 상호작용을 하는가?", "{대상}의 본질적인 원리는 무엇인가?", "{현상}의 원인과 결과를 분석한다면?", "{사례}를 통해 알 수 있는 보편적 가치는?"]
+            },
+            controversial: {
+                label: "논쟁적 질문",
+                characteristic: "다양한 관점이 충돌하며 가치 판단을 요구하는 질문",
+                templates: ["{쟁점}에 대해 어떤 입장을 지지하는가?", "{이해관계자}들의 입장이 다른 이유는?", "{정책}의 긍정적/부정적 측면은?", "만약 {조건}이 바뀐다면 어떤 대안이 가능한가?"]
             }
         };
+
+        function generateSpecificQuestion(type) {
+            if (!questionTypes[type]) return;
+            const templates = questionTypes[type].templates;
+            const template = templates[Math.floor(Math.random() * templates.length)];
+
+            let result = template;
+            if (selectedSubjectStd) {
+                const keywords = selectedSubjectStd.desc.split(' ').filter(w => w.length > 1).slice(0, 2).join(', ');
+                result = result.replace(/{대상}|{개념[A-B]}|{주제}|{현상}|{개념A}|{개념B}|{쟁점}|{과정}/g, keywords);
+            }
+
+            const idMap = { factual: 'qFactual', conceptual: 'qConceptual', controversial: 'qControversial' };
+            document.getElementById(idMap[type]).value = result;
+        }
+
+        // GRASPS Template Data from Ontology
+        const graspsTemplates = {
+            goal: "여러분의 과제는 [수업 제목]이며, 목표는 [평가과제]하는 것입니다.",
+            role: "여러분은 [전문가/이해관계자]이며, [특정 임무]를 요구받았습니다.",
+            audience: "여러분은 이 주제를 [관련 집단]에게 설명할 수 있어야 합니다.",
+            situation: "이 문제를 해결할 때 중요하게 다루어야 할 내용은 [탐구질문]입니다.",
+            product: "여러분은 [목표]를 해결하기 위해 [결과물]을 만들거나 개발할 필요가 있습니다.",
+            standards: "여러분의 수행 결과물은 [성취기준과 내용요소]를 포함하고 있어야 합니다."
+        };
+
+        function generateGRASPS() {
+            if (!selectedSubjectStd || !selectedLibStd) {
+                alert('성취기준이 선택되지 않았습니다.');
+                return;
+            }
+
+            const title = document.getElementById('lessonTitle').value || "수업 주제";
+            const ctx = document.getElementById('customContext').value || "관련 주제";
+            const keywords = selectedSubjectStd.desc.split(/[ ,.()]+/).filter(w => w.length > 1).slice(0, 2).join(', ');
+
+            // Get Inquiry Questions from Step 4
+            const qFact = document.getElementById('qFactual').value.trim();
+            const qConc = document.getElementById('qConceptual').value.trim();
+            const qCont = document.getElementById('qControversial').value.trim();
+            const allQuestions = [qFact, qConc, qCont].filter(q => q).join(' / ') || "탐구 질문을 입력해주세요.";
+
+            // Role Heuristics
+            const roleMap = {
+                '과학': '환경 과학자 및 기술 연구원',
+                '사회': '지역사회 정책 분석가',
+                '국어': '비평가 및 작가',
+                '도덕': '윤리 위원회 위원',
+                '진로': '미래 설계 컨설턴트',
+                '역사': '역사 문화 큐레이터'
+            };
+            const roleName = roleMap[selectedSubject] || '창의적인 문제 해결 전문가';
+
+            // Get Instructional Intent from Step 4
+            const intent = document.getElementById('instructionalIntent').value.trim() || `${keywords}의 원리를 활용하여 실제 문제를 해결`;
+
+            // Goal
+            document.getElementById('g_goal').value = graspsTemplates.goal
+                .replace("[수업 제목]", title)
+                .replace("[평가과제]", intent);
+
+            // Get Evaluation Task from Step 4
+            const evaluationTask = document.getElementById('graspsTask').value.trim() || `${ctx}와(과) 관련된 대안 제시 및 실행`;
+
+            // Role
+            document.getElementById('g_role').value = graspsTemplates.role
+                .replace("[전문가/이해관계자]", roleName)
+                .replace("[특정 임무]", evaluationTask);
+
+            // Audience
+            document.getElementById('g_audience').value = graspsTemplates.audience
+                .replace("[수업 제목 관련 집단]", "본 주제에 관심 있는 학교 공동체 및 전문가 그룹");
+
+            // Situation
+            document.getElementById('g_situation').value = graspsTemplates.situation
+                .replace("[탐구질문]", allQuestions);
+
+            // Product
+            document.getElementById('g_product').value = graspsTemplates.product
+                .replace("[목표]", "문제를 효과적으로 해결")
+                .replace("[결과물]", "멀티미디어 보고서, 캠페인 웹진 또는 정책 제안서");
+
+            // Get Content Elements from Step 4
+            const kLib = document.getElementById('contentKnowledgeLib').value.trim();
+            const kSub = document.getElementById('contentKnowledgeSub').value.trim();
+            const pLib = document.getElementById('contentProcessLib').value.trim();
+            const pSub = document.getElementById('contentProcessSub').value.trim();
+            const vLib = document.getElementById('contentValueLib').value.trim();
+            const vSub = document.getElementById('contentValueSub').value.trim();
+
+            const allContentElements = [kLib, kSub, pLib, pSub, vLib, vSub]
+                .filter(val => val !== "")
+                .join(', ');
+
+            const contentString = allContentElements
+                ? `${allContentElements} 등 핵심 내용 요소`
+                : "선택된 핵심 내용 요소";
+
+            // Standards
+            document.getElementById('g_standards').value = graspsTemplates.standards
+                .replace("[성취기준과 내용요소]", `${selectedSubjectStd.code}(${keywords}), ${selectedLibStd.code} 및 ${contentString}`);
+        }
+
+        function generateRubric() {
+            if (!selectedSubjectStd || !selectedLibStd) {
+                alert('성취기준이 선택되지 않았습니다.');
+                return;
+            }
+
+            const sub = selectedSubjectStd.desc;
+            const lib = selectedLibStd.desc;
+
+            // Extract keywords from subject standard (smart keyword extraction)
+            const subKeywords = sub.split(/[ ,.()]+/)
+                .filter(w => w.length > 1 && !['이해하고', '인식한다', '설명할', '수행할', '통해'].includes(w))
+                .slice(0, 3).join(', ');
+
+            // Get Content Elements from Step 4 (Merged Lib and Sub)
+            const kLib = document.getElementById('contentKnowledgeLib').value.trim();
+            const kSub = document.getElementById('contentKnowledgeSub').value.trim();
+            const elementK = [kLib, kSub].filter(x => x).join(' / ') || sub;
+
+            const pLib = document.getElementById('contentProcessLib').value.trim();
+            const pSub = document.getElementById('contentProcessSub').value.trim();
+            const elementS = [pLib, pSub].filter(x => x).join(' / ') || sub;
+
+            const vLib = document.getElementById('contentValueLib').value.trim();
+            const vSub = document.getElementById('contentValueSub').value.trim();
+            const elementA = [vLib, vSub].filter(x => x).join(' / ') || "적극적인 탐구 태도";
+
+            // Prepare merged labels (Content Element + Standard Keywords)
+            const labelK = elementK.includes('(') ? elementK : `${elementK} (${subKeywords})`;
+            const labelS = elementS.includes('(') ? elementS : `${elementS} (${subKeywords})`;
+            const labelA = elementA.includes('(') ? elementA : `${elementA} (${subKeywords})`;
+
+            // Enhanced generative logic incorporating Content Elements + Standards Keywords
+            const rubricData = {
+                K: { // Knowledge
+                    H: `${labelK}의 핵심 개념을 완벽히 이해하고, ${lib}의 정보 검색 및 분석 원리와 연계하여 깊이 있게 설명할 수 있음.`,
+                    M: `${labelK}의 주요 내용을 파악하고 있으며, ${lib}의 탐구 절차를 적절히 적용할 수 있음.`,
+                    L: `${labelK}나 ${lib}의 지식 수준이 단편적이며, 개념 간의 관계를 파악하는 데 어려움이 있음.`
+                },
+                S: { // Skill
+                    H: `${labelS} 과정에서 요구하는 핵심 기능을 숙달하여 수행하고, 정보 활용 능력(탐색-분석-산출)을 통합적으로 발휘해 탁월한 결과물을 만들어냄.`,
+                    M: `${labelS} 해결 과정에 적극적으로 참여하며, 안내된 정보 활용 도구를 사용하여 완성도 있는 산출물을 제작함.`,
+                    L: `${labelS}를 수행하는 기술적 숙련도가 낮으며, 정보 기기나 자료 활용 시 지속적인 도움이 필요함.`
+                },
+                A: { // Attitude
+                    H: `${labelA}의 가치를 내면화하여 주도적으로 탐구하며, 지식 정보 보안 및 저작권 윤리를 준수하고 협력적 태도를 일관되게 보임.`,
+                    M: `${labelA} 관련 활동에 성실히 참여하고, 정보 활용 윤리의 중요성을 인식하며 동료와 협력하려 노력함.`,
+                    L: `${labelA} 관련 활동에 소극적이며, 정해진 모둠 규칙이나 정보 활용의 기초적인 에티켓 준수가 부족함.`
+                }
+            };
+
+            // Fill textareas
+            document.getElementById('rubricK_H').value = rubricData.K.H;
+            document.getElementById('rubricK_M').value = rubricData.K.M;
+            document.getElementById('rubricK_L').value = rubricData.K.L;
+
+            document.getElementById('rubricS_H').value = rubricData.S.H;
+            document.getElementById('rubricS_M').value = rubricData.S.M;
+            document.getElementById('rubricS_L').value = rubricData.S.L;
+
+            document.getElementById('rubricA_H').value = rubricData.A.H;
+            document.getElementById('rubricA_M').value = rubricData.A.M;
+            document.getElementById('rubricA_L').value = rubricData.A.L;
+        }
+
+        function updateSummary() {
+            document.getElementById('summarySubject').innerHTML = `
+                <span style="font-weight:bold; color:var(--primary-color)">[${selectedSubject}]</span> 
+                ${selectedSubjectStd.code} ${selectedSubjectStd.desc}
+            `;
+            document.getElementById('summaryLib').innerHTML = `
+                ${selectedLibStd.code} ${selectedLibStd.desc}
+            `;
+            document.getElementById('summaryContext').textContent = contextText;
+        }
+
+        // --- Integrated Download Function ---
+        function downloadIntegratedPlan() {
+            // 1. Prepare Export Container
+            const exportContainer = document.createElement('div');
+            exportContainer.className = 'exporting';
+
+            // 2. Clone Steps 4, 5, 6
+            const steps = [
+                document.getElementById('step4'),
+                document.getElementById('step5'),
+                document.getElementById('step6')
+            ];
+
+            steps.forEach((step, idx) => {
+                const clone = step.cloneNode(true);
+                clone.style.display = 'block';
+                clone.style.marginBottom = '40px';
+                clone.style.padding = '0';
+                clone.style.boxShadow = 'none';
+
+                // Remove navigation and UI buttons from clone
+                const uiElements = clone.querySelectorAll('.btn-container, button:not(.btn-admin), .btn-admin, .no-export');
+                uiElements.forEach(el => el.remove());
+
+                // Transform input/textarea to text in clone
+                const originalControls = step.querySelectorAll('input, textarea');
+                const clonedControls = clone.querySelectorAll('input, textarea');
+
+                clonedControls.forEach((control, cIdx) => {
+                    const original = originalControls[cIdx];
+                    const val = original.value || '';
+                    const wrapper = document.createElement('div');
+                    wrapper.style.whiteSpace = 'pre-wrap';
+                    wrapper.style.padding = '8px';
+                    wrapper.style.border = '1px solid #e2e8f0';
+                    wrapper.style.borderRadius = '4px';
+                    wrapper.style.marginBottom = '10px';
+                    wrapper.style.minHeight = '1.2em';
+                    wrapper.style.backgroundColor = '#fff';
+                    wrapper.textContent = val;
+
+                    control.parentNode.replaceChild(wrapper, control);
+                });
+
+                // Add Page Header
+                const header = document.createElement('h1');
+                header.textContent = `단계 ${idx + 4}`;
+                header.style.color = '#6366f1';
+                header.style.borderBottom = '2px solid #6366f1';
+                header.style.paddingBottom = '10px';
+                header.style.marginTop = '40px';
+
+                const stepWrapper = document.createElement('div');
+                stepWrapper.className = 'step-wrapper';
+                stepWrapper.appendChild(header);
+                stepWrapper.appendChild(clone);
+                exportContainer.appendChild(stepWrapper);
+            });
+
+            // 3. Create Full HTML Document
+            const title = document.getElementById('lessonTitle').value || '협력수업_설계안';
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>${title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background-color: #fff; }
+        h1, h2, h3 { color: #6366f1; }
+        .summary-box { background-color: #f1f5f9; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 20px; }
+        .summary-label { font-weight: bold; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
+        .summary-content { font-size: 1.1rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #bfdbfe; padding: 12px; text-align: left; }
+        th { background-color: #f8fafc; color: #64748b; font-size: 0.9rem; }
+        .code-badge { background-color: #6366f1; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; display: inline-block; margin-bottom: 4px; }
+        .design-grid { display: grid; gap: 20px; }
+        
+        @media print { 
+            .no-print { display: none; } 
+            .step-wrapper { 
+                page-break-before: always; 
+            }
+            .step-wrapper:first-child {
+                page-break-before: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header style="text-align:center; margin-bottom: 50px;">
+        <h1 style="font-size: 2.5rem; margin-bottom:10px;">협력수업 설계 통합 보고서</h1>
+        <p style="color: #64748b;">${new Date().toLocaleDateString()}</p>
+    </header>
+    ${exportContainer.innerHTML}
+</body>
+</html>`;
+
+            // 4. Trigger Download
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}_통합설계안.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
     </script>
 </body>
 
